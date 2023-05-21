@@ -1,1 +1,7 @@
 .pio
+
+.idea
+.vscode
+*.iml
+CMakeLists*
+cmake-build-*
