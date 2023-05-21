@@ -35,7 +35,11 @@ void App::setup() {
     // Load settings
     auto settings = sdLoadString(APP_SETTINGS_SD_PATH);
     if (settings != nullptr) {
-        _settings->load(*settings);
+        if (!_settings->load(*settings)) {
+            M5.Display.println("ERROR: Invalid settings.");
+            halt();
+        }
+        M5.Display.println("Settings loaded.");
     } else {
         _settings->load();
     }
