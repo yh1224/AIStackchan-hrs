@@ -2,7 +2,22 @@
 
 ## Summary
 
-This is an altenative implementation of AI Stack-chan. Super thanks to [meganetaaan](https://github.com/meganetaaan) the originator of Stack-chan and [robo8080](https://github.com/robo8080) the originator of AI Stack-chan.
+This is an alternative implementation of AI Stack-chan. Super thanks to [meganetaaan](https://github.com/meganetaaan) the originator of Stack-chan and [robo8080](https://github.com/robo8080) the originator of AI Stack-chan.
+
+## Features
+
+- The following speech services can be used
+  - [Google Translate](https://translate.google.com/) Text-to-Speech API (no API Key reqiured) - *unofficial?*
+  - [VoiceText Web API](https://cloud.voicetext.jp/webapi) (API Key required) - *free registration suspended for now*
+- API
+  - Speak API
+  - Chat API (OpenAI API Key required)
+- Speak randomly
+  - send a question to the ChatGPT and speak answer periodically
+  - start/stop by button A
+- Speak clock
+  - on every hour
+  - current time by button C
 
 ## Settings
 
@@ -43,6 +58,7 @@ Here is the example of settings.
   "voice": {
     "lang": "ja_JP",
     "volume": 200,
+    "service": "voicetext",
     "voicetext": {
       "apiKey": "VoiceText API Key",
       "params": "speaker=hikari&speed=120&pitch=130&emotion=happiness"
@@ -72,7 +88,7 @@ Here is the example of settings.
 }
 ```
 
-### Network settings
+### Network settings *(reboot required)*
 
 - `network.wifi.ssid` [string] : Wi-Fi SSID
 - `network.wifi.pass` [string] : Wi-Fi passphrase
@@ -80,7 +96,7 @@ Here is the example of settings.
 - `time.zone` [string] : Time zone (Default: `"JST-9"`)
 - `time.ntpServer` [string] : NTP Server (Default: `"ntp.nict.jp"`)
 
-### Servo settings
+### Servo settings *(reboot required)*
 
 - `servo.pin.x`, `servo.pin.y` [int] : Pin number for servo (Required to swing head)
   - M5Stack Core2 - Port A : `{"x": 33, "y": 32}`
@@ -89,11 +105,13 @@ Here is the example of settings.
 
 ### Voice settings
 
-- `voice.lang` [string] : Speech language for Google TTS (Default: `"ja_JP"`)
+- `voice.lang` [string] : Speech language for Google Translate TTS (Default: `"ja_JP"`)
 - `voice.volume` [int] : Speech volume (Default: `200`)
-- `voice.service` [string] : Speech service: `google-translate-tts`/`voicetext` (Default: `google-translate-tts`)
-- `voice.voicetext.apiKey` [string] : [VoiceText](https://cloud.voicetext.jp/webapi) API Key (Required to speech by VoiceText)
-- `voice.voicetext.params` [string] : Voice parameters for VoiceText API (Default: `"speaker=hikari&speed=120&pitch=130&emotion=happiness"`)
+- `voice.service` [string] : Speech service (Default: `"google-translate-tts"`)
+  - `"google-translate-tts"` : [Google Translate](https://translate.google.com/) Text-to-Speech API
+  - `"voicetext"` : [VoiceText Web API](https://cloud.voicetext.jp/webapi)
+- `voice.voicetext.apiKey` [string] : VoiceText: API Key (Required to speech by VoiceText)
+- `voice.voicetext.params` [string] : VoiceText: parameters (Default: `"speaker=hikari&speed=120&pitch=130&emotion=happiness"`)
 
 ### Chat settings
 
@@ -103,3 +121,29 @@ Here is the example of settings.
 - `chat.random.interval.min`-`random.interval.max` [int] : Random speech interval (Default: `60`-`120`)
 - `chat.random.questions` [string[]] : Questions to ChatGPT for random speech
 - `chat.clock.hours` [int[]] : Speech hours list
+
+## API
+
+### Speak API
+
+- Path: /speech
+- Parameters
+  - text : Text to speak
+
+Example
+
+```shell
+curl -X POST "http://(Stack-chan's IP address)/speech" \
+    -d "text=Hello"
+```
+
+### Chat API
+
+- Path: /chat
+- Parameters
+  - message : question
+
+```shell
+curl -X POST "http://(Stack-chan's IP address)/chat" \
+    -d "message=Say something"
+```
