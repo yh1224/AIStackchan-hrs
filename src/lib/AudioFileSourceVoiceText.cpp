@@ -14,24 +14,21 @@ AudioFileSourceVoiceText::AudioFileSourceVoiceText(String apiKey, String text, S
 
 bool AudioFileSourceVoiceText::open(const char *url) {
     _http.setReuse(false);
-
     if (!_http.begin(url)) {
-        Serial.println("Connection failed.");
+        Serial.println("ERROR: HTTPClient begin failed.");
         return false;
     }
-
-    String auth = base64::encode(_apiKey + ":");
-    _http.addHeader("Authorization", "Basic " + auth);
+    _http.setAuthorization(_apiKey.c_str(), "");
     _http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String request = String("text=") + urlEncode(_text.c_str()) + "&format=mp3&" + _ttsParams;
-    _http.addHeader("Content-Length", String(request.length()));
+    String request = "text=" + urlEncode(_text.c_str()) + "&format=mp3&" + _ttsParams;
 
-    auto code = _http.POST(request);
-    if (code != HTTP_CODE_OK) {
-        Serial.printf("Error: %d\n", code);
+    Serial.printf(">>> POST %s\n", url);
+    Serial.println(request);
+    auto httpCode = _http.POST(request);
+    if (httpCode != HTTP_CODE_OK) {
+        Serial.printf("ERROR: %d\n", httpCode);
         _http.end();
         return false;
     }
-    _size = _http.getSize();
     return true;
 }

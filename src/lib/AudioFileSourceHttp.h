@@ -35,8 +35,6 @@ protected:
     HTTPClient _http;
 
 protected:
-    int _size = 0;
-
     int _pos = 0;
 
     uint32_t _read(void *data, uint32_t len, bool nonBlock);

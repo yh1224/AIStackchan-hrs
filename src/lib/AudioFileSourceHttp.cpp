@@ -7,19 +7,18 @@ AudioFileSourceHttp::AudioFileSourceHttp(const char *url) {
 
 bool AudioFileSourceHttp::open(const char *url) {
     _http.setReuse(false);
-
     if (!_http.begin(url)) {
-        Serial.println("Connection failed.");
+        Serial.println("ERROR: HTTPClient begin failed.");
         return false;
     }
 
-    auto code = _http.GET();
-    if (code != HTTP_CODE_OK) {
-        Serial.printf("Error: %d\n", code);
+    Serial.printf(">>> GET %s\n", url);
+    auto httpCode = _http.GET();
+    if (httpCode != HTTP_CODE_OK) {
+        Serial.printf("ERROR: %d\n", httpCode);
         _http.end();
         return false;
     }
-    _size = _http.getSize();
     return true;
 }
 
@@ -50,7 +49,7 @@ bool AudioFileSourceHttp::isOpen() {
 }
 
 uint32_t AudioFileSourceHttp::getSize() {
-    return _size;
+    return _http.getSize();
 }
 
 uint32_t AudioFileSourceHttp::getPos() {
@@ -58,7 +57,8 @@ uint32_t AudioFileSourceHttp::getPos() {
 }
 
 uint32_t AudioFileSourceHttp::_read(void *data, uint32_t len, bool nonBlock) {
-    if (!_http.connected() || (_size > 0 && _pos >= _size)) {
+    auto size = getSize();
+    if (!_http.connected() || (size > 0 && _pos >= size)) {
         return 0;
     }
 

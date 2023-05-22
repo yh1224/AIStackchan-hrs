@@ -140,12 +140,12 @@ static bool readChunk(WiFiClient *stream, const std::function<bool(const char *)
             }
             auto c = stream->read();
             if (c < 0) {
-                Serial.printf("readChunk: read: %d\n", c);
+                Serial.printf("readChunk: read failed (%d)\n", c);
                 return false;
             }
             buf[pos++] = (char) c;
             if (pos > 6) {  // hex 4 桁まで
-                Serial.println("readChunk: Invalid chunk size");
+                Serial.println("readChunk: Invalid chunk size (too long)");
                 return false;
             }
             if (pos >= 2 && buf[pos - 2] == '\r' && buf[pos - 1] == '\n') {
@@ -154,7 +154,7 @@ static bool readChunk(WiFiClient *stream, const std::function<bool(const char *)
                 char *endp;
                 chunkSize = strtol((char *) buf, &endp, 16);
                 if (endp != (char *) &buf[pos - 2]) {
-                    Serial.println("readChunk: Invalid chunk size");
+                    Serial.printf("readChunk: Invalid chunk size: %s\n", buf);
                     return -1;
                 }
                 //Serial.printf("readChunk: chunkSize=%d\n", chunkSize);
