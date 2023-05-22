@@ -144,7 +144,7 @@ static bool readChunk(WiFiClient *stream, const std::function<bool(const char *)
                 return false;
             }
             buf[pos++] = (char) c;
-            if (pos > 6) {  // hex 4 桁まで
+            if (pos > 8) {  // hex 6 桁まで
                 Serial.println("readChunk: Invalid chunk size (too long)");
                 return false;
             }
