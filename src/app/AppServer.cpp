@@ -109,7 +109,7 @@ void AppServer::_onSettings() {
     bool result = true;
     if (_httpServer.method() == HTTPMethod::HTTP_POST ||
         _httpServer.method() == HTTPMethod::HTTP_PUT) {
-        if (_httpServer.header("Content-Type") == "application/json") {
+        if (_httpServer.header("Content-Type").startsWith("application/json")) {
             result = _settings->load(_httpServer.arg("plain"),
                                      _httpServer.method() == HTTPMethod::HTTP_PUT);
         } else {
