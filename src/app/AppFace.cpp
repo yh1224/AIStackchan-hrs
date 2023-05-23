@@ -94,7 +94,7 @@ void AppFace::servo(void *args) {
             // Reset to home position
             _servoX.setEaseTo(DEGREE_X_HOME);
             _servoY.setEaseTo(DEGREE_Y_HOME);
-        } else {
+        } else if (!_voice->isPlaying()) {
             // Swing head to the gaze
             float gazeH, gazeV;
             _avatar.getGaze(&gazeV, &gazeH);
