@@ -225,7 +225,7 @@ String AppChat::_talk(const String &text, bool useHistory) {
         auto response = client.chat(
                 text, getChatRoles(), useHistory ? _chatHistory : noHistory,
                 [&](const String &body) {
-                    Serial.printf("%s", body.c_str());
+                    //Serial.printf("%s", body.c_str());
                     ss << body.c_str();
                     auto sentences = splitSentence(ss.str());
                     if (sentences.size() > (index + 1)) {
