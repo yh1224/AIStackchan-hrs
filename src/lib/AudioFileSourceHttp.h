@@ -31,7 +31,8 @@ public:
     uint32_t getPos() override;
 
 protected:
-    WiFiClientSecure _client;
+    WiFiClient _client;
+    WiFiClientSecure _secureClient;
     HTTPClient _http;
 
 protected:

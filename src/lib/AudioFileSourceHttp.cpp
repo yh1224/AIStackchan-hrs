@@ -7,7 +7,7 @@ AudioFileSourceHttp::AudioFileSourceHttp(const char *url) {
 
 bool AudioFileSourceHttp::open(const char *url) {
     _http.setReuse(false);
-    if (!_http.begin(url)) {
+    if (!_http.begin(strncmp(url, "https://", 8) == 0 ? _secureClient : _client, url)) {
         Serial.println("ERROR: HTTPClient begin failed.");
         return false;
     }
