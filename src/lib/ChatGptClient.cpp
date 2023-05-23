@@ -261,7 +261,7 @@ String ChatGptClient::_httpPost(
         int httpCode = http.POST((uint8_t *) body.c_str(), body.length());
         if (httpCode != HTTP_CODE_OK) {
             Serial.println(HTTPClient::errorToString(httpCode).c_str());
-            throw ChatGptHttpError(httpCode, ("HTTP client error: " + String(httpCode)).c_str());
+            throw ChatGptHttpError(httpCode, "HTTP client error: " + String(httpCode));
         }
 
         Serial.printf("<<< %d\n", httpCode);

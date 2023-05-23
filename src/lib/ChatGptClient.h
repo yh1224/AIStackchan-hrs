@@ -2,22 +2,23 @@
 #define LIB_CHATGPT_CLIENT_H
 
 #include <deque>
+#include <utility>
 #include <vector>
 #include <Arduino.h>
 
 class ChatGptClientError : public std::exception {
 public:
-    explicit ChatGptClientError(const char *msg) : _msg(msg) {};
+    explicit ChatGptClientError(String msg) : _msg(std::move(msg)) {};
 
-    const char *what() { return _msg; }
+    const char *what() { return _msg.c_str(); }
 
 private:
-    const char *_msg;
+    String _msg;
 };
 
 class ChatGptHttpError : public ChatGptClientError {
 public:
-    ChatGptHttpError(int code, const char *msg) : _statusCode(code), ChatGptClientError(msg) {};
+    ChatGptHttpError(int code, String msg) : _statusCode(code), ChatGptClientError(msg) {};
 
     int statusCode() const { return _statusCode; }
 
