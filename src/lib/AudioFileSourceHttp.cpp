@@ -65,8 +65,8 @@ uint32_t AudioFileSourceHttp::_read(void *data, uint32_t len, bool nonBlock) {
     auto stream = _http.getStreamPtr();
     if (!nonBlock) {
         auto start = millis();
-        while ((stream->available() < (int) len) && (millis() - start < 500)) {
-            yield();
+        while (_http.connected() && stream->available() < (int) len && (millis() - start < 500)) {
+            delay(10);
         }
     }
 
