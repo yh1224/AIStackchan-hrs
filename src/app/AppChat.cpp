@@ -217,9 +217,8 @@ String AppChat::_talk(const String &text, bool useHistory) {
     _setFace(m5avatar::Expression::Doubt, "...");
 
     // call ChatGPT
-    std::deque<String> noHistory;
-    std::unique_ptr<String> result = nullptr;
     try {
+        std::deque<String> noHistory;
 #if defined(CHATGPT_EVENT_STREAM)
         std::stringstream ss;
         int index = 0;
@@ -247,7 +246,6 @@ String AppChat::_talk(const String &text, bool useHistory) {
         Serial.printf("%s\n", response.c_str());
         _voice->speech(response);
 #endif // defined(CHATGPT_EVENT_STREAM)
-        result = std::unique_ptr<String>(new String(response));
 
         if (useHistory) {
             // チャット履歴が最大数を超えた場合、古い質問と回答を削除
@@ -257,27 +255,27 @@ String AppChat::_talk(const String &text, bool useHistory) {
             }
             // 質問と回答をチャット履歴に追加
             _chatHistory.push_back(text);
-            _chatHistory.push_back(*result);
+            _chatHistory.push_back(response);
         }
+        return response;
     } catch (ChatGptClientError &e) {
         Serial.printf("ERROR: %s\n", e.what());
+        String errorMessage;
         try {
             throw;
         } catch (ChatGptHttpError &e) {
-            auto errorMessage = "Error: " + String(e.statusCode());
-            _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
+            errorMessage = "Error: " + String(e.statusCode());
         } catch (std::exception &e) {
-            _setFace(m5avatar::Expression::Sad, "Error", 3000);
+            errorMessage = "Error";
         }
+        _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
         if (_getLang() == "ja_JP") {
-            result = std::unique_ptr<String>(new String("わかりません"));
+            _voice->speak("わかりません");
         } else {
-            result = std::unique_ptr<String>(new String("I don't understand."));
+            _voice->speak("I don't understand.");
         }
-        _voice->speak(*result);
+        return errorMessage;
     }
-
-    return *result;
 }
 
 void AppChat::_loop() {
