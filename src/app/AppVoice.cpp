@@ -48,7 +48,7 @@ void AppVoice::start() {
             "AppVoice",
             8192,
             this,
-            2,
+            1,
             &_taskHandle,
             APP_CPU_NUM
     );
