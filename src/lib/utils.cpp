@@ -71,5 +71,10 @@ std::vector<std::string> splitLines(const std::string &str) {
 }
 
 std::vector<std::string> splitSentence(const std::string &str) {
-    return splitString(str, std::vector<std::string>{"\r", "\n", ".", "。", "?", "？", "!", "！"}, true);
+    std::vector<std::string> tokens;
+    for (const auto &token: splitString(str, std::vector<std::string>{"\r", "\n"})) {
+        auto tempTokens = splitString(token, std::vector<std::string>{".", "。", "?", "？", "!", "！"}, true);
+        tokens.insert(tokens.end(), tempTokens.begin(), tempTokens.end());
+    }
+    return tokens;
 }
