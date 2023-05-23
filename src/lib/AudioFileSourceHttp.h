@@ -37,8 +37,11 @@ protected:
 
 protected:
     int _pos = 0;
+    size_t _chunkLen = 0;
 
     uint32_t _read(void *data, uint32_t len, bool nonBlock);
+
+    bool _isChunked();
 };
 
 #endif // AudioFileSourceHttp_H
