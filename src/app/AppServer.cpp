@@ -120,6 +120,10 @@ void AppServer::_onSettings() {
                     _settings->remove(name);
                 } else if (std::all_of(val.begin(), val.end(), ::isdigit)) {
                     _settings->set(name, std::stoi(val.c_str()));
+                } else if (val == "true") {
+                    _settings->set(name, true);
+                } else if (val == "false") {
+                    _settings->set(name, false);
                 } else {
                     _settings->set(name, val);
                 }

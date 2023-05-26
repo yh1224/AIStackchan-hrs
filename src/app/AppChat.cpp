@@ -10,9 +10,6 @@
 #include "lib/ChatGptClient.h"
 #include "lib/utils.h"
 
-/// ChatGPT: Use Event Stream
-#define CHATGPT_EVENT_STREAM
-
 void AppChat::setup() {
 }
 
@@ -134,6 +131,10 @@ const char *AppChat::_getOpenAiApiKey() {
     return _settings->get(CONFIG_CHAT_OPENAI_APIKEY_KEY);
 }
 
+bool AppChat::_useStream() {
+    return _settings->get(CONFIG_CHAT_OPENAI_STREAM_KEY) | CONFIG_CHAT_OPENAI_STREAM_DEFAULT;
+}
+
 int AppChat::_getMaxHistory() {
     return _settings->get(CONFIG_CHAT_OPENAI_MAX_HISTORY_KEY) | CONFIG_CHAT_OPENAI_MAX_HISTORY_DEFAULT;
 }
@@ -219,33 +220,35 @@ String AppChat::_talk(const String &text, bool useHistory) {
     // call ChatGPT
     try {
         std::deque<String> noHistory;
-#if defined(CHATGPT_EVENT_STREAM)
-        std::stringstream ss;
-        int index = 0;
-        auto response = client.chat(
-                text, getChatRoles(), useHistory ? _chatHistory : noHistory,
-                [&](const String &body) {
-                    //Serial.printf("%s", body.c_str());
-                    ss << body.c_str();
-                    auto sentences = splitSentence(ss.str());
-                    if (sentences.size() > (index + 1)) {
-                        _setFace(m5avatar::Expression::Neutral, "");
-                        for (int i = index; i < sentences.size() - 1; i++) {
-                            _voice->speak(sentences[i].c_str());
-                            index++;
+        String response;
+        if (_useStream()) {
+            std::stringstream ss;
+            int index = 0;
+            response = client.chat(
+                    text, getChatRoles(), useHistory ? _chatHistory : noHistory,
+                    [&](const String &body) {
+                        //Serial.printf("%s", body.c_str());
+                        ss << body.c_str();
+                        auto sentences = splitSentence(ss.str());
+                        if (sentences.size() > (index + 1)) {
+                            _setFace(m5avatar::Expression::Neutral, "");
+                            for (int i = index; i < sentences.size() - 1; i++) {
+                                _voice->speak(sentences[i].c_str());
+                                index++;
+                            }
                         }
-                    }
-                });
-        _setFace(m5avatar::Expression::Neutral, "");
-        auto sentences = splitSentence(response.c_str());
-        for (int i = index; i < sentences.size(); i++) {
-            _voice->speak(sentences[i].c_str());
+                    });
+            _setFace(m5avatar::Expression::Neutral, "");
+            auto sentences = splitSentence(response.c_str());
+            for (int i = index; i < sentences.size(); i++) {
+                _voice->speak(sentences[i].c_str());
+            }
+        } else {
+            response = client.chat(text, getChatRoles(), useHistory ? _chatHistory : noHistory, nullptr);
+            //Serial.printf("%s\n", response.c_str());
+            _setFace(m5avatar::Expression::Neutral, "");
+            _voice->speak(response);
         }
-#else
-        auto response = client.chat(text, _getRoles(), useHistory ? _chatHistory : noHistory, nullptr);
-        Serial.printf("%s\n", response.c_str());
-        _voice->speech(response);
-#endif // defined(CHATGPT_EVENT_STREAM)
 
         if (useHistory) {
             // チャット履歴が最大数を超えた場合、古い質問と回答を削除

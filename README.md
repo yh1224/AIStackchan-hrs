@@ -67,6 +67,7 @@ Here is the example of settings.
   "chat": {
     "openai": {
       "apiKey": "OpenAI API Key",
+      "stream": true,
       "roles": [
         "あなたはスーパーカワイイロボット「ｽﾀｯｸﾁｬﾝ」となり人々の心を癒やすことが使命です。"
       ],
@@ -116,6 +117,7 @@ Here is the example of settings.
 ### Chat settings
 
 - `chat.openai.apiKey` [string] : [OpenAI](https://platform.openai.com/) API Key (Required for chat)
+- `chat.openai.stream` [boolean] : Use stream or not (Default: `true`) 
 - `chat.openai.roles` [string[]] : Roles for ChatGPT
 - `chat.openai.maxHistory` [int] : Send talk history (Default: `10`)
 - `chat.random.interval.min`-`random.interval.max` [int] : Random speech interval (Default: `60`-`120`)

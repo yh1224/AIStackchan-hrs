@@ -22,6 +22,8 @@
 #define CONFIG_VOICE_VOICETEXT_APIKEY_KEY "voice.voicetext.apiKey"
 #define CONFIG_VOICE_VOICETEXT_PARAMS_KEY "voice.voicetext.params"
 #define CONFIG_VOICE_VOICETEXT_PARAMS_DEFAULT "speaker=hikari&speed=120&pitch=130&emotion=happiness"
+#define CONFIG_CHAT_OPENAI_STREAM_KEY "chat.openai.stream"
+#define CONFIG_CHAT_OPENAI_STREAM_DEFAULT true
 #define CONFIG_CHAT_OPENAI_APIKEY_KEY "chat.openai.apiKey"
 #define CONFIG_CHAT_OPENAI_ROLES_KEY "chat.openai.roles"
 #define CONFIG_CHAT_OPENAI_MAX_HISTORY_KEY "chat.openai.maxHistory"

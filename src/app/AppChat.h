@@ -70,6 +70,8 @@ private:
 
     const char *_getOpenAiApiKey();
 
+    bool _useStream();
+
     int _getMaxHistory();
 
     unsigned long _getRandomSpeakNextTime();
