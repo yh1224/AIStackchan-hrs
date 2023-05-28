@@ -7,6 +7,7 @@
 #include "app/AppFace.h"
 #include "app/AppVoice.h"
 #include "app/config.h"
+#include "app/lang.h"
 #include "lib/ChatGptClient.h"
 #include "lib/utils.h"
 
@@ -59,18 +60,10 @@ void AppChat::toggleRandomSpeakMode() {
     if (!_randomSpeakMode) {
         _randomSpeakMode = true;
         _randomSpeakNextTime = _getRandomSpeakNextTime();
-        if (_getLang() == "ja_JP") {
-            message = "ひとりごと始めます。";
-        } else {
-            message = "random speak mode started.";
-        }
+        message = String(t(_getLang().c_str(), "chat_random_started"));
     } else {
         _randomSpeakMode = false;
-        if (_getLang() == "ja_JP") {
-            message = "ひとりごとやめます。";
-        } else {
-            message = "random speak mode stopped.";
-        }
+        message = String(t(_getLang().c_str(), "chat_random_stopped"));
     }
     xSemaphoreGive(_lock);
     _voice->stopSpeak();
@@ -85,25 +78,17 @@ void AppChat::speakCurrentTime() {
     String message;
     struct tm tm{};
     if (getLocalTime(&tm)) {
+        const char *format;
         if (tm.tm_min == 0) {
-            if (_getLang() == "ja_JP") {
-                message = String(tm.tm_hour) + "時 ちょうどです。";
-            } else {
-                message = String(tm.tm_hour) + " o'clock";
-            }
+            format = t(_getLang().c_str(), "clock_now_noon");
         } else {
-            if (_getLang() == "ja_JP") {
-                message = String(tm.tm_hour) + "時" + String(tm.tm_min) + "分です。";
-            } else {
-                message = String(tm.tm_hour) + " " + String(tm.tm_min);
-            }
+            format = t(_getLang().c_str(), "clock_now");
         }
+        char messageBuf[strlen(format) + 1];
+        snprintf(messageBuf, sizeof(messageBuf), format, tm.tm_hour, tm.tm_min);
+        message = String(messageBuf);
     } else {
-        if (_getLang() == "ja_JP") {
-            message = "時刻が設定されていません。";
-        } else {
-            message = "The clock is not set.";
-        }
+        t(_getLang().c_str(), "clock_not_set");
     }
     _voice->stopSpeak();
     _voice->speak(message);
@@ -204,18 +189,13 @@ void AppChat::_setFace(m5avatar::Expression expression, const String &text, int 
 String AppChat::_talk(const String &text, bool useHistory) {
     auto apiKey = _getOpenAiApiKey();
     if (apiKey == nullptr) {
-        String message;
-        if (_getLang() == "ja_JP") {
-            message = "API キーが設定されていません";
-        } else {
-            message = "API Key is not set.";
-        }
+        String message = t(_getLang().c_str(), "apikey_not_set");
         _voice->speak(message);
         return message;
     }
 
     ChatGptClient client{apiKey};
-    _setFace(m5avatar::Expression::Doubt, "...");
+    _setFace(m5avatar::Expression::Doubt, t(_getLang().c_str(), "chat_thinking..."));
 
     // call ChatGPT
     try {
@@ -272,11 +252,7 @@ String AppChat::_talk(const String &text, bool useHistory) {
             errorMessage = "Error";
         }
         _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
-        if (_getLang() == "ja_JP") {
-            _voice->speak("わかりません");
-        } else {
-            _voice->speak("I don't understand.");
-        }
+        _voice->speak(t(_getLang().c_str(), "chat_i_dont_understand"));
         return errorMessage;
     }
 }

@@ -69,6 +69,7 @@ Here is the example of settings.
       "apiKey": "OpenAI API Key",
       "stream": true,
       "roles": [
+        "Answer in Japanese.",
         "あなたはスーパーカワイイロボット「ｽﾀｯｸﾁｬﾝ」となり人々の心を癒やすことが使命です。"
       ],
       "maxHistory": 10
