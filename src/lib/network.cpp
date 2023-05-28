@@ -91,17 +91,16 @@ void setMDnsHostname(const char *hostname) {
  * @param ntpServer NTP server
  */
 void syncTime(const char *tz, const char *ntpServer) {
-    M5.Display.printf("Synchronizing time");
+    M5.Display.printf("Synchronizing time:");
     configTzTime(tz, ntpServer);
 
     struct tm now{};
-    while (!getLocalTime(&now)) {
-        M5.Display.printf(".");
-        delay(500);
+    if (!getLocalTime(&now)) {
+        M5.Display.println(" failed");
+    } else {
+        std::stringstream ss;
+        ss << std::put_time(&now, "%Y-%m-%d %H:%M:%S");
+        M5.Display.println("");
+        M5.Display.println(ss.str().c_str());
     }
-
-    std::stringstream ss;
-    ss << std::put_time(&now, "%Y-%m-%d %H:%M:%S");
-    M5.Display.println("");
-    M5.Display.println(ss.str().c_str());
 }
