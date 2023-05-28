@@ -11,7 +11,7 @@
 #define CONFIG_SERVO_PIN_X_KEY "servo.pin.x"
 #define CONFIG_SERVO_PIN_Y_KEY "servo.pin.y"
 #define CONFIG_VOICE_LANG_KEY "voice.lang"
-#define CONFIG_VOICE_LANG_DEFAULT "ja_JP"
+#define CONFIG_VOICE_LANG_DEFAULT "ja"
 #define CONFIG_VOICE_VOLUME_KEY "voice.volume"
 #define CONFIG_VOICE_VOLUME_DEFAULT 200
 #define CONFIG_VOICE_SERVICE_KEY "voice.service"

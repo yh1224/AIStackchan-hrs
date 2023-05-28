@@ -109,7 +109,8 @@ String AppChat::talk(const String &text, bool useHistory) {
 }
 
 String AppChat::_getLang() {
-    return _settings->get(CONFIG_VOICE_LANG_KEY) | CONFIG_VOICE_LANG_DEFAULT;
+    String lang = _settings->get(CONFIG_VOICE_LANG_KEY) | CONFIG_VOICE_LANG_DEFAULT;
+    return lang.substring(0, 2); // en-US -> en
 }
 
 const char *AppChat::_getOpenAiApiKey() {

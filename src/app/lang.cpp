@@ -45,26 +45,19 @@ static const std::map<std::string, std::map<std::string, const char *>> clockSpe
 /**
  * Get text from language code
  *
- * @param lang language code
+ * @param lang language code (ISO 639-1)
  * @param key text key
  * @return text
  */
 const char *t(const char *lang, const char *key) {
-    auto defaultLangMap = clockSpeechMap.at("en");
-    auto langMap = defaultLangMap;
     if (clockSpeechMap.find(lang) != clockSpeechMap.end()) {
-        // matches exactly
-        langMap = clockSpeechMap.at(lang);
-    } else {
-        std::string code(lang, 2);
-        if (clockSpeechMap.find(code) != clockSpeechMap.end()) {
-            // matches code
-            langMap = clockSpeechMap.at(code);
+        auto langMap = clockSpeechMap.at(lang);
+        if (langMap.find(key) != langMap.end()) {
+            return langMap.at(key);
         }
     }
-    if (langMap.find(key) != langMap.end()) {
-        return langMap.at(key);
-    } else if (defaultLangMap.find(key) != defaultLangMap.end()) {
+    auto defaultLangMap = clockSpeechMap.at("en");
+    if (defaultLangMap.find(key) != defaultLangMap.end()) {
         return defaultLangMap.at(key);
     }
     return key; // unexpected

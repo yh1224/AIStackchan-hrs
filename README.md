@@ -56,7 +56,7 @@ Here is the example of settings.
     "pin": {"x": 13, "y": 14}
   },
   "voice": {
-    "lang": "ja_JP",
+    "lang": "ja",
     "volume": 200,
     "service": "voicetext",
     "voicetext": {
@@ -107,7 +107,7 @@ Here is the example of settings.
 
 ### Voice settings
 
-- `voice.lang` [string] : Speech language for Google Translate TTS (Default: `"ja_JP"`)
+- `voice.lang` [string] : Speech language for Google Translate TTS (Default: `"ja"`)
 - `voice.volume` [int] : Speech volume (Default: `200`)
 - `voice.service` [string] : Speech service (Default: `"google-translate-tts"`)
   - `"google-translate-tts"` : [Google Translate](https://translate.google.com/) Text-to-Speech API
