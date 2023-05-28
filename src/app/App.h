@@ -36,6 +36,14 @@ private:
     std::shared_ptr<AppServer> _server;
 
     bool _isServoEnabled();
+
+    void _onTapCenter();
+
+    void _onButtonA();
+
+    void _onButtonB();
+
+    void _onButtonC();
 };
 
 #endif // !defined(APP_APP_H)

@@ -91,34 +91,25 @@ void App::setup() {
     _chat->start();
 }
 
+static const Box boxCenter{120, 80, 80, 80};
+static const Box boxButtonA{0, 200, 106, 40};
+static const Box boxButtonB{106, 200, 108, 40};
+static const Box boxButtonC{214, 200, 106, 40};
+
 void App::loop() {
     M5.update();
-
-    // Swing ON/OFF
-    if (_isServoEnabled()) {
-        if (M5.Touch.getCount()) {
-            auto t = M5.Touch.getDetail();
-            if (t.wasPressed()) {
-                Box boxServo{80, 120, 80, 80};
-                if (boxServo.contain(t.x, t.y)) {
-                    M5.Speaker.tone(1000, 100);
-                    _face->toggleHeadSwing();
-                }
-            }
+    if (M5.Touch.getCount()) {
+        auto t = M5.Touch.getDetail();
+        if (t.wasPressed()) {
+            if (boxCenter.contain(t.x, t.y)) _onTapCenter();
+            if (boxButtonA.contain(t.x, t.y)) _onButtonA();
+            if (boxButtonB.contain(t.x, t.y)) _onButtonB();
+            if (boxButtonC.contain(t.x, t.y)) _onButtonC();
         }
     }
-
-    // Button A: Random speak mode ON/OFF
-    if (M5.BtnA.wasPressed()) {
-        M5.Speaker.tone(1000, 100);
-        _chat->toggleRandomSpeakMode();
-    }
-
-    // Button C: Speak current time
-    if (M5.BtnC.wasPressed()) {
-        M5.Speaker.tone(1000, 100);
-        _chat->speakCurrentTime();
-    }
+    if (M5.BtnA.wasPressed()) _onButtonA();
+    if (M5.BtnB.wasPressed()) _onButtonB();
+    if (M5.BtnC.wasPressed()) _onButtonC();
 
     _server->loop();
 
@@ -127,4 +118,32 @@ void App::loop() {
 
 bool App::_isServoEnabled() {
     return _settings->has("servo");
+}
+
+/**
+ * Tap Center: Swing ON/OFF
+ */
+void App::_onTapCenter() {
+    if (_isServoEnabled()) {
+        M5.Speaker.tone(1000, 100);
+        _face->toggleHeadSwing();
+    }
+}
+
+/**
+ * Button A: Random speak mode ON/OFF
+ */
+void App::_onButtonA() {
+    M5.Speaker.tone(1000, 100);
+    _chat->toggleRandomSpeakMode();
+}
+
+void App::_onButtonB() {}
+
+/**
+ * Button C: Speak current time
+ */
+void App::_onButtonC() {
+    M5.Speaker.tone(1000, 100);
+    _chat->speakCurrentTime();
 }
