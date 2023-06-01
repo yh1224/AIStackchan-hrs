@@ -16,11 +16,6 @@ static const m5avatar::Expression EXPRESSIONS[] = {
         m5avatar::Expression::Angry,
 };
 
-#define DEGREE_X_HOME 90   /// Head home position (degree of x-axis)
-#define DEGREE_Y_HOME 85   /// Head home position (degree of y-axis)
-#define DEGREE_X_RANGE 30  /// Head swing width (degree of x-axis)
-#define DEGREE_Y_RANGE 20  /// Head swing width (degree of y-axis)
-
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
 
@@ -29,27 +24,33 @@ bool AppFace::init() {
     int servoPinX = pin.first;
     int servoPinY = pin.second;
     if (_isServoEnabled() && servoPinX != 0 && servoPinY != 0) {
+        auto home = _getSwingHome();
+        _homeX = home.first;
+        _homeY = home.second;
+        auto range = _getSwingRange();
+        _rangeX = range.first;
+        _rangeY = range.second;
         if (0 == _servoX.attach(
                 servoPinX,
-                DEGREE_X_HOME,
+                _homeX,
                 DEFAULT_MICROSECONDS_FOR_0_DEGREE,
                 DEFAULT_MICROSECONDS_FOR_180_DEGREE
         )) {
             Serial.println("ERROR: Failed to attach servo x.");
         }
         _servoX.setEasingType(EASE_QUADRATIC_IN_OUT);
-        _servoX.setEaseTo(DEGREE_X_HOME);
+        _servoX.setEaseTo(_homeX);
 
         if (0 == _servoY.attach(
                 servoPinY,
-                DEGREE_Y_HOME,
+                _homeY,
                 DEFAULT_MICROSECONDS_FOR_0_DEGREE,
                 DEFAULT_MICROSECONDS_FOR_180_DEGREE
         )) {
             Serial.println("ERROR: Failed to attach servo y.");
         }
         _servoY.setEasingType(EASE_QUADRATIC_IN_OUT);
-        _servoY.setEaseTo(DEGREE_Y_HOME);
+        _servoY.setEaseTo(_homeY);
 
         setSpeedForAllServos(30);
         synchronizeAllServosStartAndWaitForAllServosToStop();
@@ -92,14 +93,14 @@ void AppFace::servo(void *args) {
     while (true) {
         if (!_headSwing) {
             // Reset to home position
-            _servoX.setEaseTo(DEGREE_X_HOME);
-            _servoY.setEaseTo(DEGREE_Y_HOME);
+            _servoX.setEaseTo(_homeX);
+            _servoY.setEaseTo(_homeY);
         } else if (!_voice->isPlaying()) {
             // Swing head to the gaze
             float gazeH, gazeV;
             _avatar.getGaze(&gazeV, &gazeH);
-            auto degreeX = DEGREE_X_HOME + (int) ((float) DEGREE_X_RANGE / 2 * gazeH);
-            auto degreeY = DEGREE_Y_HOME + (int) ((float) DEGREE_Y_RANGE / 2 * gazeV);
+            auto degreeX = (_homeX + (int) ((float) _rangeX / 2 * gazeH) + 360) % 360;
+            auto degreeY = (_homeY + (int) ((float) _rangeY / 2 * gazeV) + 360) % 360;
             //Serial.printf("gaze (%.2f, %.2f) -> degree (%d, %d)\n", gazeH, gazeV, degreeX, degreeY);
             _servoX.setEaseTo(degreeX);
             _servoY.setEaseTo(degreeY);
@@ -160,4 +161,16 @@ std::pair<int, int> AppFace::_getServoPin() {
     int servoPinX = _settings->get(CONFIG_SERVO_PIN_X_KEY);
     int servoPinY = _settings->get(CONFIG_SERVO_PIN_Y_KEY);
     return std::make_pair(servoPinX, servoPinY);
+}
+
+std::pair<int, int> AppFace::_getSwingHome() {
+    int homeX = _settings->get(CONFIG_SWING_HOME_X_KEY) | CONFIG_SWING_HOME_X_DEFAULT;
+    int homeY = _settings->get(CONFIG_SWING_HOME_Y_KEY) | CONFIG_SWING_HOME_Y_DEFAULT;
+    return std::make_pair(homeX, homeY);
+}
+
+std::pair<int, int> AppFace::_getSwingRange() {
+    int homeX = _settings->get(CONFIG_SWING_RANGE_X_KEY) | CONFIG_SWING_RANGE_X_DEFAULT;
+    int homeY = _settings->get(CONFIG_SWING_RANGE_Y_KEY) | CONFIG_SWING_RANGE_Y_DEFAULT;
+    return std::make_pair(homeX, homeY);
 }

@@ -48,12 +48,19 @@ private:
     /// servo to swing head
     ServoEasing _servoX, _servoY;
 
+    /// Swing parameters
+    int _homeX, _homeY, _rangeX, _rangeY;
+
     /// head swing mode
     bool _headSwing;
 
     bool _isServoEnabled();
 
     std::pair<int, int> _getServoPin();
+
+    std::pair<int, int> _getSwingHome();
+
+    std::pair<int, int> _getSwingRange();
 };
 
 #endif // !defined(APP_FACE_H)

@@ -10,6 +10,14 @@
 #define CONFIG_TIME_NTP_SERVER_DEFAULT "ntp.nict.jp"
 #define CONFIG_SERVO_PIN_X_KEY "servo.pin.x"
 #define CONFIG_SERVO_PIN_Y_KEY "servo.pin.y"
+#define CONFIG_SWING_HOME_X_KEY "swing.home.x"
+#define CONFIG_SWING_HOME_X_DEFAULT 90
+#define CONFIG_SWING_HOME_Y_KEY "swing.home.y"
+#define CONFIG_SWING_HOME_Y_DEFAULT 80
+#define CONFIG_SWING_RANGE_X_KEY "swing.range.x"
+#define CONFIG_SWING_RANGE_X_DEFAULT 30
+#define CONFIG_SWING_RANGE_Y_KEY "swing.range.y"
+#define CONFIG_SWING_RANGE_Y_DEFAULT 20
 #define CONFIG_VOICE_LANG_KEY "voice.lang"
 #define CONFIG_VOICE_LANG_DEFAULT "ja"
 #define CONFIG_VOICE_VOLUME_KEY "voice.volume"

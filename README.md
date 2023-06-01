@@ -55,6 +55,10 @@ Here is the example of settings.
   "servo": {
     "pin": {"x": 13, "y": 14}
   },
+  "swing": {
+    "home": {"x": 90, "y": 80},
+    "range": {"x": 30, "y": 20}
+  },
   "voice": {
     "lang": "ja",
     "volume": 200,
@@ -98,7 +102,7 @@ Here is the example of settings.
 - `time.zone` [string] : Time zone (Default: `"JST-9"`)
 - `time.ntpServer` [string] : NTP Server (Default: `"ntp.nict.jp"`)
 
-### Servo settings *(reboot required)*
+### Servo/Swing settings *(reboot required)*
 
 - `servo.pin.x`, `servo.pin.y` [int] : Pin number for servo (Required to swing head)
   - M5Stack CoreS3 - Port B : `{"x": 8, "y": 9}`
@@ -106,6 +110,8 @@ Here is the example of settings.
   - M5Stack Core2 - Port A : `{"x": 33, "y": 32}`
   - M5Stack Core2 - Port C : `{"x": 13, "y": 14}`
   - M5Stack Core/Fire : `{"x": 21, "y": 22}`
+- `swing.home.x`, `swing.home.y` [int] : Home position in degrees (Default: `{"x": 90, "y": 80}`)
+- `swing.range.x`, `swing.range.y` [int] : Swing range in degrees (Default: `"range": {"x": 30, "y": 20}`)
 
 ### Voice settings
 
