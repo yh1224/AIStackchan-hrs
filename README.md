@@ -105,6 +105,7 @@ Here is the example of settings.
 ### Servo/Swing settings *(reboot required)*
 
 - `servo.pin.x`, `servo.pin.y` [int] : Pin number for servo (Required to swing head)
+  - M5Stack CoreS3 - Port A : `{"x": 1, "y": 2}`
   - M5Stack CoreS3 - Port B : `{"x": 8, "y": 9}`
   - M5Stack CoreS3 - Port C : `{"x": 18, "y": 17}`
   - M5Stack Core2 - Port A : `{"x": 33, "y": 32}`
