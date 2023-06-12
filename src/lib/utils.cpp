@@ -2,27 +2,19 @@
 #include <vector>
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <iomanip>
 
-// from http://hardwarefun.com/tutorials/url-encoding-in-arduino
-// modified by chaeplin
 String urlEncode(const char *msg) {
-    const char *hex = "0123456789ABCDEF";
-    String encodedMsg = "";
-
-    while (*msg != '\0') {
-        if (('a' <= *msg && *msg <= 'z')
-            || ('A' <= *msg && *msg <= 'Z')
-            || ('0' <= *msg && *msg <= '9')
-            || *msg == '-' || *msg == '_' || *msg == '.' || *msg == '~') {
-            encodedMsg += *msg;
+    std::stringstream ss;
+    for (const char *p = msg; *p != '\0'; p++) {
+        if (('a' <= *p && *p <= 'z') || ('A' <= *p && *p <= 'Z') || ('0' <= *p && *p <= '9')
+            || *p == '-' || *p == '_' || *p == '.' || *p == '~') {
+            ss << *p;
         } else {
-            encodedMsg += '%';
-            encodedMsg += hex[*msg >> 4];
-            encodedMsg += hex[*msg & 0xf];
+            ss << '%' << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << (int) *p;
         }
-        msg++;
     }
-    return encodedMsg;
+    return ss.str().c_str();
 }
 
 String jsonEncode(const DynamicJsonDocument &jsonDoc) {

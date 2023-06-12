@@ -20,8 +20,8 @@ public:
             flush();
             return false;
         }
-        _buf[_index][_pos++] = sample[0];
-        _buf[_index][_pos++] = sample[0];
+        _buf[_index][_pos++] = sample[LEFTCHANNEL];
+        _buf[_index][_pos++] = sample[LEFTCHANNEL];
         return true;
     }
 
