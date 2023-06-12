@@ -26,6 +26,8 @@ public:
 
     void start();
 
+    void loop();
+
     void lipSync(void *args);
 
     void servo(void *args);

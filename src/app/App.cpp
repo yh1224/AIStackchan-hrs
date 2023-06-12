@@ -112,6 +112,7 @@ void App::loop() {
     if (M5.BtnC.wasPressed()) _onButtonC();
 
     _server->loop();
+    _face->loop();
 
     delay(50);
 }

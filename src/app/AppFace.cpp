@@ -61,6 +61,7 @@ bool AppFace::init() {
 
 void AppFace::setup() {
     _avatar.init();
+    _avatar.setBatteryIcon(true);
     _avatar.setSpeechFont(&fonts::efontJA_16);
 }
 
@@ -70,6 +71,10 @@ void AppFace::start() {
     if (_isServoEnabled()) {
         _avatar.addTask([](void *args) { face->servo(args); }, "servo");
     }
+}
+
+void AppFace::loop() {
+    _avatar.setBatteryStatus(M5.Power.isCharging(), M5.Power.getBatteryLevel());
 }
 
 /**
