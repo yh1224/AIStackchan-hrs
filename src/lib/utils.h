@@ -5,8 +5,6 @@
 #include <vector>
 #include <ArduinoJson.h>
 
-String urlEncode(const char *msg);
-
 String jsonEncode(const DynamicJsonDocument &jsonDoc);
 
 std::vector<std::string> splitString(

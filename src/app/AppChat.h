@@ -36,11 +36,11 @@ public:
 
     void speakCurrentTime();
 
-    String talk(const String &text) {
-        return talk(text, false);
+    String talk(const String &text, String &voiceName) {
+        return talk(text, voiceName, false);
     }
 
-    String talk(const String &text, bool useHistory);
+    String talk(const String &text, const String &voiceName, bool useHistory);
 
 private:
     std::shared_ptr<NvsSettings> _settings;
@@ -70,7 +70,7 @@ private:
 
     const char *_getOpenAiApiKey();
 
-    const char * _getChatGptModel();
+    const char *_getChatGptModel();
 
     bool _useStream();
 
@@ -94,7 +94,7 @@ private:
 
     void _setFace(m5avatar::Expression expression, const String &text, int duration);
 
-    String _talk(const String &text, bool useHistory);
+    String _talk(const String &text, const String &voiceName, bool useHistory);
 
     void _loop();
 };

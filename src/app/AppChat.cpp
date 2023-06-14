@@ -67,7 +67,7 @@ void AppChat::toggleRandomSpeakMode() {
     }
     xSemaphoreGive(_lock);
     _voice->stopSpeak();
-    _voice->speak(message);
+    _voice->speak(message, "");
     _setFace(m5avatar::Expression::Happy, "", 3000);
 }
 
@@ -91,7 +91,7 @@ void AppChat::speakCurrentTime() {
         t(_getLang().c_str(), "clock_not_set");
     }
     _voice->stopSpeak();
-    _voice->speak(message);
+    _voice->speak(message, "");
 }
 
 /**
@@ -101,9 +101,9 @@ void AppChat::speakCurrentTime() {
  * @param useHistory use chat history
  * @return answer
  */
-String AppChat::talk(const String &text, bool useHistory) {
+String AppChat::talk(const String &text, const String &voiceName, bool useHistory) {
     xSemaphoreTake(_lock, portMAX_DELAY);
-    auto answer = _talk(text, useHistory);
+    auto answer = _talk(text, voiceName, useHistory);
     xSemaphoreGive(_lock);
     return answer;
 }
@@ -191,11 +191,11 @@ void AppChat::_setFace(m5avatar::Expression expression, const String &text, int 
  * @param useHistory use chat history
  * @return answer (nullptr: error)
  */
-String AppChat::_talk(const String &text, bool useHistory) {
+String AppChat::_talk(const String &text, const String &voiceName, bool useHistory) {
     auto apiKey = _getOpenAiApiKey();
     if (apiKey == nullptr) {
         String message = t(_getLang().c_str(), "apikey_not_set");
-        _voice->speak(message);
+        _voice->speak(message, voiceName);
         return message;
     }
 
@@ -218,7 +218,7 @@ String AppChat::_talk(const String &text, bool useHistory) {
                         if (sentences.size() > (index + 1)) {
                             _setFace(m5avatar::Expression::Neutral, "");
                             for (int i = index; i < sentences.size() - 1; i++) {
-                                _voice->speak(sentences[i].c_str());
+                                _voice->speak(sentences[i].c_str(), voiceName);
                                 index++;
                             }
                         }
@@ -226,13 +226,13 @@ String AppChat::_talk(const String &text, bool useHistory) {
             _setFace(m5avatar::Expression::Neutral, "");
             auto sentences = splitSentence(response.c_str());
             for (int i = index; i < sentences.size(); i++) {
-                _voice->speak(sentences[i].c_str());
+                _voice->speak(sentences[i].c_str(), voiceName);
             }
         } else {
             response = client.chat(text, getChatRoles(), useHistory ? _chatHistory : noHistory, nullptr);
             //Serial.printf("%s\n", response.c_str());
             _setFace(m5avatar::Expression::Neutral, "");
-            _voice->speak(response);
+            _voice->speak(response, voiceName);
         }
 
         if (useHistory) {
@@ -257,7 +257,7 @@ String AppChat::_talk(const String &text, bool useHistory) {
             errorMessage = "Error";
         }
         _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
-        _voice->speak(t(_getLang().c_str(), "chat_i_dont_understand"));
+        _voice->speak(t(_getLang().c_str(), "chat_i_dont_understand"), voiceName);
         return errorMessage;
     }
 }
@@ -278,7 +278,7 @@ void AppChat::_loop() {
             speakCurrentTime();
         } else if (_randomSpeakMode && _isRandomSpeakTimeNow(now)) {
             // random speak mode
-            _talk(_getRandomSpeakQuestion(), false);
+            _talk(_getRandomSpeakQuestion(), "", false);
         }
         xSemaphoreGive(_lock);
     }

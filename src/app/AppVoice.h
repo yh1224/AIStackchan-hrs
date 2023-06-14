@@ -10,6 +10,13 @@
 #include "lib/AudioOutputM5Speaker.hpp"
 #include "lib/NvsSettings.h"
 
+class SpeechMessage {
+public:
+    SpeechMessage(String text, String voice) : text(std::move(text)), voice(std::move(voice)) {};
+    String text;
+    String voice;
+};
+
 class AppVoice {
 public:
     explicit AppVoice(
@@ -30,7 +37,9 @@ public:
 
     bool setVolume(uint8_t volume);
 
-    void speak(const String &text);
+    bool setVoiceName(const String &voiceName);
+
+    void speak(const String &text, const String &voiceName);
 
     void stopSpeak();
 
@@ -47,7 +56,7 @@ private:
     uint8_t _speakerChannel = 0;
 
     /// message list to play
-    std::deque<std::unique_ptr<String>> _speechMessages;
+    std::deque<std::unique_ptr<SpeechMessage>> _speechMessages;
 
     /// output speaker
     AudioOutputM5Speaker _audioOut{&M5.Speaker, _speakerChannel};

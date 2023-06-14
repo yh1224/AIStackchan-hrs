@@ -2,20 +2,6 @@
 #include <vector>
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <iomanip>
-
-String urlEncode(const char *msg) {
-    std::stringstream ss;
-    for (const char *p = msg; *p != '\0'; p++) {
-        if (('a' <= *p && *p <= 'z') || ('A' <= *p && *p <= 'Z') || ('0' <= *p && *p <= '9')
-            || *p == '-' || *p == '_' || *p == '.' || *p == '~') {
-            ss << *p;
-        } else {
-            ss << '%' << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << (int) *p;
-        }
-    }
-    return ss.str().c_str();
-}
 
 String jsonEncode(const DynamicJsonDocument &jsonDoc) {
     String jsonStr;

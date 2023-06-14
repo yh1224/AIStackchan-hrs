@@ -1,6 +1,5 @@
-#include <google-tts.h>
-
 #include "AudioFileSourceGoogleTranslateTts.h"
+#include "lib/url.h"
 
 // Google Trust Services https://pki.goog/repository/
 /// GTS Root R1, valid until 2036-06-22
@@ -38,11 +37,14 @@ static const char *caCert = \
 "-----END CERTIFICATE-----\n" \
 "";
 
-AudioFileSourceGoogleTranslateTts::AudioFileSourceGoogleTranslateTts(const char *text, const char *lang) {
+static const char *GOOGLE_TRANSLATION_TTS_API_URL = "http://translate.google.com/translate_tts";
+
+AudioFileSourceGoogleTranslateTts::AudioFileSourceGoogleTranslateTts(const char *text, UrlParams params) {
     _secureClient.setCACert(caCert);
-    TTS tts;
-    auto url = tts.getSpeechUrl(text, lang);
-    // TODO: https だと音が切れる?? とりあえず http に変換する。
-    url.replace("https://", "http://");
+    params["ie"] = "UTF-8";
+    params["q"] = text;
+    params["client"] = "tw-ob";
+    params["ttsspeed"] = "1";
+    auto url = String(GOOGLE_TRANSLATION_TTS_API_URL) + "?" + qsBuild(params).c_str();
     open(url.c_str());
 }

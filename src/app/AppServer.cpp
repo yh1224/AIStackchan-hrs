@@ -35,12 +35,12 @@ void AppServer::_onRoot() {
 void AppServer::_onSpeech() {
     auto message = _httpServer.arg("say");
     auto expressionStr = _httpServer.arg("expression");
-    auto voiceStr = _httpServer.arg("voice");
+    auto voice = _httpServer.arg("voice");
     if (!_face->setExpressionIndex(expressionStr.toInt())) {
         _httpServer.send(400);
     }
     _voice->stopSpeak();
-    _voice->speak(message);
+    _voice->speak(message, voice);
     _httpServer.send(200, "text/plain", "OK");
 }
 
@@ -54,8 +54,9 @@ void AppServer::_onFace() {
 
 void AppServer::_onChat() {
     auto text = _httpServer.arg("text");
+    auto voiceName = _httpServer.arg("voice");
     _voice->stopSpeak();
-    auto answer = _chat->talk(text, true);
+    auto answer = _chat->talk(text, voiceName, true);
     _httpServer.send(200, "text/plain", answer);
 }
 
@@ -97,8 +98,14 @@ void AppServer::_onRoleSet() {
 
 void AppServer::_onSetting() {
     auto volumeStr = _httpServer.arg("volume");
+    auto voiceName = _httpServer.arg("voice");
     if (volumeStr != "") {
         if (!_voice->setVolume(volumeStr.toInt())) {
+            _httpServer.send(400);
+        }
+    }
+    if (voiceName != "") {
+        if (!_voice->setVoiceName(voiceName)) {
             _httpServer.send(400);
         }
     }

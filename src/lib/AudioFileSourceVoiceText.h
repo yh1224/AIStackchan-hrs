@@ -4,17 +4,18 @@
 #include <Arduino.h>
 
 #include "AudioFileSourceHttp.h"
+#include "lib/url.h"
 
 class AudioFileSourceVoiceText : public AudioFileSourceHttp {
 public:
-    AudioFileSourceVoiceText(String apiKey, String text, String ttsParams);
+    AudioFileSourceVoiceText(String apiKey, String text, UrlParams params);
 
     bool open(const char *url) override;
 
 private:
     String _apiKey;
     String _text;
-    String _ttsParams;
+    UrlParams _params;
 };
 
 #endif // AudioFileSourceVoiceText_H

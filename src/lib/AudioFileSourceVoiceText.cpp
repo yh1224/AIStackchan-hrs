@@ -1,9 +1,8 @@
 #include <utility>
 #include <Arduino.h>
-#include <base64.h>
 
 #include "AudioFileSourceVoiceText.h"
-#include "lib/utils.h"
+#include "lib/url.h"
 
 /// https://support.globalsign.com/ca-certificates/intermediate-certificates/organizationssl-intermediate-certificates
 /// GlobalSign RSA Organization Validation CA - 2018, Valid until: 21 November 2028
@@ -38,8 +37,8 @@ static const char *caCert = \
 
 static const char *VOICETEXT_TTS_API_URL = "https://api.voicetext.jp/v1/tts";
 
-AudioFileSourceVoiceText::AudioFileSourceVoiceText(String apiKey, String text, String ttsParams)
-        : _apiKey(std::move(apiKey)), _text(std::move(text)), _ttsParams(std::move(ttsParams)) {
+AudioFileSourceVoiceText::AudioFileSourceVoiceText(String apiKey, String text, UrlParams params)
+        : _apiKey(std::move(apiKey)), _text(std::move(text)), _params(std::move(params)) {
     _secureClient.setCACert(caCert);
     open(VOICETEXT_TTS_API_URL);
 }
@@ -52,7 +51,10 @@ bool AudioFileSourceVoiceText::open(const char *url) {
     }
     _http.setAuthorization(_apiKey.c_str(), "");
     _http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String request = "text=" + urlEncode(_text.c_str()) + "&format=mp3&" + _ttsParams;
+    auto params = _params;
+    params["text"] = _text.c_str();
+    params["format"] = "mp3";
+    String request = qsBuild(params).c_str();
 
     Serial.printf(">>> POST %s\n", url);
     Serial.println(request);

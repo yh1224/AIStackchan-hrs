@@ -9,10 +9,20 @@
 #include "lib/AudioFileSourceGoogleTranslateTts.h"
 #include "lib/AudioFileSourceVoiceText.h"
 #include "lib/AudioOutputM5Speaker.hpp"
+#include "lib/url.h"
 #include "lib/utils.h"
 
 /// size for audio buffer
 static const int BUFFER_SIZE = 16 * 1024;
+
+/// parameters for VoiceText
+const static char *VOICETEXT_VOICE_PARAMS[] = {
+        "speaker=takeru&speed=100&pitch=130&emotion=happiness&emotion_level=4",
+        "speaker=hikari&speed=120&pitch=130&emotion=happiness&emotion_level=2",
+        "speaker=bear&speed=120&pitch=100&emotion=anger&emotion_level=2",
+        "speaker=haruka&speed=80&pitch=70&emotion=happiness&emotion_level=2",
+        "&speaker=santa&speed=120&pitch=90&emotion=happiness&emotion_level=4",
+};
 
 bool AppVoice::init() {
     _audioMp3 = std::unique_ptr<AudioGeneratorMP3>(new AudioGeneratorMP3());
@@ -112,15 +122,39 @@ bool AppVoice::setVolume(uint8_t volume) {
 }
 
 /**
+ * Set voice name
+ *
+ * @param voiceName voice name
+ * @return true: success, false: failure
+ */
+bool AppVoice::setVoiceName(const String &voiceName) {
+    if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0) {
+        auto params = qsParse(_getVoiceTextParams());
+        int voiceNum = std::stoi(voiceName.c_str());
+        if (voiceNum >= 0 && voiceNum <= 4) {
+            for (const auto &item: qsParse(VOICETEXT_VOICE_PARAMS[voiceNum])) {
+                params[item.first] = item.second;
+            }
+            return _settings->set(CONFIG_VOICE_VOICETEXT_PARAMS_KEY, qsBuild(params));
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+/**
  * Start speaking text
  *
  * @param text text
  */
-void AppVoice::speak(const String &text) {
+void AppVoice::speak(const String &text, const String &voiceName) {
     xSemaphoreTake(_lock, portMAX_DELAY);
     // add each sentence to message list
     for (const auto &sentence: splitSentence(text.c_str())) {
-        _speechMessages.push_back(std::unique_ptr<String>(new String(sentence.c_str())));
+        _speechMessages.push_back(std::unique_ptr<SpeechMessage>(
+                new SpeechMessage(sentence.c_str(), voiceName.c_str())));
     }
     xSemaphoreGive(_lock);
 }
@@ -148,7 +182,7 @@ void AppVoice::_loop() {
     } else {
         // Get next message and start playing
         xSemaphoreTake(_lock, portMAX_DELAY);
-        std::unique_ptr<String> message = nullptr;
+        std::unique_ptr<SpeechMessage> message = nullptr;
         if (!_speechMessages.empty()) {
             message = std::move(_speechMessages.front());
             _speechMessages.pop_front();
@@ -163,17 +197,28 @@ void AppVoice::_loop() {
             if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0
                 && _getVoiceTextApiKey() != nullptr) {
                 // VoiceText API
+                auto params = qsParse(_getVoiceTextParams());
+                if (!message->voice.isEmpty()) {
+                    int voiceNum = std::stoi(message->voice.c_str());
+                    if (voiceNum >= 0 && voiceNum <= 4) {
+                        for (const auto &item: qsParse(VOICETEXT_VOICE_PARAMS[voiceNum])) {
+                            params[item.first] = item.second;
+                        }
+                    }
+                }
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceVoiceText(
-                        _getVoiceTextApiKey(), message->c_str(), _getVoiceTextParams()));
+                        _getVoiceTextApiKey(), message->text.c_str(), params));
             } else {
-                // Google TTS
+                // Google Translate TTS
+                UrlParams params;
+                params["tl"] = _getVoiceLang();
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceGoogleTranslateTts(
-                        message->c_str(), _getVoiceLang()));
+                        message->text.c_str(), params));
             }
             _audioSourceBuffer = std::unique_ptr<AudioFileSourceBuffer>(
                     new AudioFileSourceBuffer(_audioSource.get(), _allocatedBuffer.get(), BUFFER_SIZE));
             _audioMp3->begin(_audioSourceBuffer.get(), &_audioOut);
-            Serial.printf("voice start: %s\n", message->c_str());
+            Serial.printf("voice start: %s\n", message->text.c_str());
         }
         delay(200);
     }
