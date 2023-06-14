@@ -35,6 +35,8 @@ public:
 
     bool setVoiceTextApiKey(const String &apiKey);
 
+    bool setTtsQuestVoicevoxApiKey(const String &apiKey);
+
     bool setVolume(uint8_t volume);
 
     bool setVoiceName(const String &voiceName);
@@ -84,6 +86,10 @@ private:
     const char *_getVoiceTextApiKey();
 
     const char *_getVoiceTextParams();
+
+    const char *_getTtsQuestVoicevoxApiKey();
+
+    const char *_getTtsQuestVoicevoxParams();
 };
 
 #endif // !defined(APP_VOICE_H)

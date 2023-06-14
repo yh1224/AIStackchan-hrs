@@ -26,10 +26,14 @@
 #define CONFIG_VOICE_SERVICE_GOOGLE_TRANSLATE_TTS "google-translate-tts"
 #define CONFIG_VOICE_SERVICE_GOOGLE_CLOUD_TTS "google-cloud-tts"
 #define CONFIG_VOICE_SERVICE_VOICETEXT "voicetext"
+#define CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX "tts-quest-voicevox"
 #define CONFIG_VOICE_SERVICE_DEFAULT CONFIG_VOICE_SERVICE_GOOGLE_TRANSLATE_TTS
 #define CONFIG_VOICE_VOICETEXT_APIKEY_KEY "voice.voicetext.apiKey"
 #define CONFIG_VOICE_VOICETEXT_PARAMS_KEY "voice.voicetext.params"
 #define CONFIG_VOICE_VOICETEXT_PARAMS_DEFAULT "speaker=hikari&speed=120&pitch=130&emotion=happiness"
+#define CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY "voice.tts-quest-voicevox.apiKey"
+#define CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY "voice.tts-quest-voicevox.params"
+#define CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_DEFAULT ""
 #define CONFIG_CHAT_OPENAI_STREAM_KEY "chat.openai.stream"
 #define CONFIG_CHAT_OPENAI_STREAM_DEFAULT true
 #define CONFIG_CHAT_OPENAI_APIKEY_KEY "chat.openai.apiKey"

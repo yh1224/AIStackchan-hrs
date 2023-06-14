@@ -7,6 +7,7 @@
 #include "app/AppVoice.h"
 #include "app/config.h"
 #include "lib/AudioFileSourceGoogleTranslateTts.h"
+#include "lib/AudioFileSourceTtsQuestVoicevox.h"
 #include "lib/AudioFileSourceVoiceText.h"
 #include "lib/AudioOutputM5Speaker.hpp"
 #include "lib/url.h"
@@ -112,6 +113,20 @@ bool AppVoice::setVoiceTextApiKey(const String &apiKey) {
 }
 
 /**
+ * Set TTS QUEST VOICEVOX API Key
+ *
+ * @param apiKey VoiceText API Key
+ */
+bool AppVoice::setTtsQuestVoicevoxApiKey(const String &apiKey) {
+    if (apiKey == "") {
+        return _settings->remove(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY);
+    } else {
+        return _settings->set(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY, apiKey)
+               && _settings->set(CONFIG_VOICE_SERVICE_KEY, String(CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX));
+    }
+}
+
+/**
  * Set volume
  *
  * @param volume volume (0-255)
@@ -139,6 +154,10 @@ bool AppVoice::setVoiceName(const String &voiceName) {
         } else {
             return false;
         }
+    } else if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
+        auto params = qsParse(_getTtsQuestVoicevoxParams());
+        params["speaker"] = voiceName.c_str();
+        return _settings->set(CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY, qsBuild(params));
     } else {
         return false;
     }
@@ -194,8 +213,16 @@ void AppVoice::_loop() {
             xSemaphoreGive(_lock);
             M5.Speaker.setVolume(_getVoiceVolume());
             M5.Speaker.setChannelVolume(_speakerChannel, _getVoiceVolume());
-            if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0
-                && _getVoiceTextApiKey() != nullptr) {
+            if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
+                // TTS QUEST VOICEVOX API
+                auto params = qsParse(_getTtsQuestVoicevoxParams());
+                if (!message->voice.isEmpty()) {
+                    params["speaker"] = message->voice.c_str();
+                }
+                _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceTtsQuestVoicevox(
+                        _getTtsQuestVoicevoxApiKey(), message->text.c_str(), params));
+            } else if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0
+                       && _getVoiceTextApiKey() != nullptr) {
                 // VoiceText API
                 auto params = qsParse(_getVoiceTextParams());
                 if (!message->voice.isEmpty()) {
@@ -243,4 +270,13 @@ const char *AppVoice::_getVoiceTextApiKey() {
 const char *AppVoice::_getVoiceTextParams() {
     return (const char *) (_settings->get(CONFIG_VOICE_VOICETEXT_PARAMS_KEY)
                            | CONFIG_VOICE_VOICETEXT_PARAMS_DEFAULT);
+}
+
+const char *AppVoice::_getTtsQuestVoicevoxApiKey() {
+    return _settings->get(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY);
+}
+
+const char *AppVoice::_getTtsQuestVoicevoxParams() {
+    return (const char *) (_settings->get(CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY)
+                           | CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_DEFAULT);
 }

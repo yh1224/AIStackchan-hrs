@@ -9,6 +9,7 @@ This is an alternative implementation of AI Stack-chan. Super thanks to [meganet
 - The following speech services can be used
   - [Google Translate](https://translate.google.com/) Text-to-Speech API (no API Key reqiured) - *unofficial?*
   - [VoiceText Web API](https://cloud.voicetext.jp/webapi) (API Key required) - *free registration suspended for now*
+  - [TTS QUEST V3 VOICEVOX API](https://github.com/ts-klassen/ttsQuestV3Voicevox) (API Key required)
 - API
   - Speak API
   - Chat API (OpenAI API Key required)
@@ -122,8 +123,11 @@ Here is the example of settings.
 - `voice.service` [string] : Speech service (Default: `"google-translate-tts"`)
   - `"google-translate-tts"` : [Google Translate](https://translate.google.com/) Text-to-Speech API
   - `"voicetext"` : [VoiceText Web API](https://cloud.voicetext.jp/webapi)
+  - `"tts-quest-voicevox"` : [TTS QUEST V3 VOICEVOX API](https://github.com/ts-klassen/ttsQuestV3Voicevox)
 - `voice.voicetext.apiKey` [string] : VoiceText: API Key (Required to speech by VoiceText)
-- `voice.voicetext.params` [string] : VoiceText: parameters (Default: `"speaker=hikari&speed=120&pitch=130&emotion=happiness"`)
+- `voice.voicetext.params` [string] : VoiceText: extra parameters (Default: `"speaker=hikari&speed=120&pitch=130&emotion=happiness"`)
+- `voice.tts-quest-voicevox.apiKey` [string] : TTS QUEST V3 VOICEVOX: API Key (Optional)
+- `voice.tts-quest-voicevox.params` [string] : TTS QUEST V3 VOICEVOX: extra parameters (Default: `""`)
 
 ### Chat settings
 

@@ -67,8 +67,13 @@ void AppServer::_onApikey() {
 void AppServer::_onApikeySet() {
     auto openAiApiKey = _httpServer.arg("openai");
     auto voiceTextApiKey = _httpServer.arg("voicetext");
+    auto voicevoxApiKey = _httpServer.arg("voicevox");
     _chat->setOpenAiApiKey(openAiApiKey);
-    _voice->setVoiceTextApiKey(voiceTextApiKey);
+    if (voicevoxApiKey != "") {
+        _voice->setTtsQuestVoicevoxApiKey(voicevoxApiKey);
+    } else {
+        _voice->setVoiceTextApiKey(voiceTextApiKey);
+    }
     _httpServer.send(200, "text/plain", "OK");
 }
 
