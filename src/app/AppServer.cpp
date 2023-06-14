@@ -68,11 +68,15 @@ void AppServer::_onApikeySet() {
     auto openAiApiKey = _httpServer.arg("openai");
     auto voiceTextApiKey = _httpServer.arg("voicetext");
     auto voicevoxApiKey = _httpServer.arg("voicevox");
-    _chat->setOpenAiApiKey(openAiApiKey);
-    if (voicevoxApiKey != "") {
-        _voice->setTtsQuestVoicevoxApiKey(voicevoxApiKey);
+    _settings->setOpenAiApiKey(openAiApiKey);
+    _settings->setVoiceTextApiKey(voiceTextApiKey);
+    _settings->setTtsQuestVoicevoxApiKey(voicevoxApiKey);
+    if (!voicevoxApiKey.isEmpty()) {
+        _settings->setVoiceService(VOICE_SERVICE_TTS_QUEST_VOICEVOX);
+    } else if (!voiceTextApiKey.isEmpty()) {
+        _settings->setVoiceService(VOICE_SERVICE_VOICETEXT);
     } else {
-        _voice->setVoiceTextApiKey(voiceTextApiKey);
+        _settings->setVoiceService(VOICE_SERVICE_GOOGLE_TRANSLATE_TTS);
     }
     _httpServer.send(200, "text/plain", "OK");
 }
@@ -80,7 +84,7 @@ void AppServer::_onApikeySet() {
 void AppServer::_onRoleGet() {
     DynamicJsonDocument result(4 * 1024);
     result.createNestedArray("roles");
-    for (const auto &role: _chat->getChatRoles()) {
+    for (const auto &role: _settings->getChatRoles()) {
         result["roles"].add(role);
     }
     _httpServer.send(200, "application/json", jsonEncode(result));
@@ -90,9 +94,9 @@ void AppServer::_onRoleSet() {
     auto roleStr = _httpServer.arg("plain");
     bool result;
     if (roleStr == "") {
-        result = _chat->clearRoles();
+        result = _settings->clearRoles();
     } else {
-        result = _chat->addRole(roleStr);
+        result = _settings->addRole(roleStr);
     }
     if (!result) {
         _httpServer.send(400);
@@ -105,7 +109,7 @@ void AppServer::_onSetting() {
     auto volumeStr = _httpServer.arg("volume");
     auto voiceName = _httpServer.arg("voice");
     if (volumeStr != "") {
-        if (!_voice->setVolume(volumeStr.toInt())) {
+        if (!_settings->setVoiceVolume(volumeStr.toInt())) {
             _httpServer.send(400);
         }
     }

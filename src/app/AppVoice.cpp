@@ -5,7 +5,6 @@
 #include <M5Unified.h>
 
 #include "app/AppVoice.h"
-#include "app/config.h"
 #include "lib/AudioFileSourceGoogleTranslateTts.h"
 #include "lib/AudioFileSourceTtsQuestVoicevox.h"
 #include "lib/AudioFileSourceVoiceText.h"
@@ -98,66 +97,27 @@ bool AppVoice::isPlaying() {
 }
 
 /**
- * Set VoiceText API Key
- *
- * @param apiKey VoiceText API Key
- */
-bool AppVoice::setVoiceTextApiKey(const String &apiKey) {
-    if (apiKey == "") {
-        return _settings->remove(CONFIG_VOICE_VOICETEXT_APIKEY_KEY)
-               && _settings->set(CONFIG_VOICE_SERVICE_KEY, String(CONFIG_VOICE_SERVICE_GOOGLE_TRANSLATE_TTS));
-    } else {
-        return _settings->set(CONFIG_VOICE_VOICETEXT_APIKEY_KEY, apiKey)
-               && _settings->set(CONFIG_VOICE_SERVICE_KEY, String(CONFIG_VOICE_SERVICE_VOICETEXT));
-    }
-}
-
-/**
- * Set TTS QUEST VOICEVOX API Key
- *
- * @param apiKey VoiceText API Key
- */
-bool AppVoice::setTtsQuestVoicevoxApiKey(const String &apiKey) {
-    if (apiKey == "") {
-        return _settings->remove(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY);
-    } else {
-        return _settings->set(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY, apiKey)
-               && _settings->set(CONFIG_VOICE_SERVICE_KEY, String(CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX));
-    }
-}
-
-/**
- * Set volume
- *
- * @param volume volume (0-255)
- * @return true: success, false: failure
- */
-bool AppVoice::setVolume(uint8_t volume) {
-    return _settings->set(CONFIG_VOICE_VOLUME_KEY, (int) volume);
-}
-
-/**
  * Set voice name
  *
  * @param voiceName voice name
  * @return true: success, false: failure
  */
 bool AppVoice::setVoiceName(const String &voiceName) {
-    if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0) {
-        auto params = qsParse(_getVoiceTextParams());
+    if (strcasecmp(_settings->getVoiceService(), VOICE_SERVICE_VOICETEXT) == 0) {
+        auto params = qsParse(_settings->getVoiceTextParams());
         int voiceNum = std::stoi(voiceName.c_str());
         if (voiceNum >= 0 && voiceNum <= 4) {
             for (const auto &item: qsParse(VOICETEXT_VOICE_PARAMS[voiceNum])) {
                 params[item.first] = item.second;
             }
-            return _settings->set(CONFIG_VOICE_VOICETEXT_PARAMS_KEY, qsBuild(params));
+            return _settings->setVoiceTextParams(qsBuild(params).c_str());
         } else {
             return false;
         }
-    } else if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
-        auto params = qsParse(_getTtsQuestVoicevoxParams());
+    } else if (strcasecmp(_settings->getVoiceService(), VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
+        auto params = qsParse(_settings->getTtsQuestVoicevoxParams());
         params["speaker"] = voiceName.c_str();
-        return _settings->set(CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY, qsBuild(params));
+        return _settings->setTtsQuestVoicevoxParams(qsBuild(params).c_str());
     } else {
         return false;
     }
@@ -211,20 +171,20 @@ void AppVoice::_loop() {
             xSemaphoreTake(_lock, portMAX_DELAY);
             _isRunning = true;
             xSemaphoreGive(_lock);
-            M5.Speaker.setVolume(_getVoiceVolume());
-            M5.Speaker.setChannelVolume(_speakerChannel, _getVoiceVolume());
-            if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
+            M5.Speaker.setVolume(_settings->getVoiceVolume());
+            M5.Speaker.setChannelVolume(_speakerChannel, _settings->getVoiceVolume());
+            if (strcasecmp(_settings->getVoiceService(), VOICE_SERVICE_TTS_QUEST_VOICEVOX) == 0) {
                 // TTS QUEST VOICEVOX API
-                auto params = qsParse(_getTtsQuestVoicevoxParams());
+                auto params = qsParse(_settings->getTtsQuestVoicevoxParams());
                 if (!message->voice.isEmpty()) {
                     params["speaker"] = message->voice.c_str();
                 }
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceTtsQuestVoicevox(
-                        _getTtsQuestVoicevoxApiKey(), message->text.c_str(), params));
-            } else if (strcasecmp(_getVoiceService(), CONFIG_VOICE_SERVICE_VOICETEXT) == 0
-                       && _getVoiceTextApiKey() != nullptr) {
+                        _settings->getTtsQuestVoicevoxApiKey(), message->text.c_str(), params));
+            } else if (strcasecmp(_settings->getVoiceService(), VOICE_SERVICE_VOICETEXT) == 0
+                       && _settings->getVoiceTextApiKey() != nullptr) {
                 // VoiceText API
-                auto params = qsParse(_getVoiceTextParams());
+                auto params = qsParse(_settings->getVoiceTextParams());
                 if (!message->voice.isEmpty()) {
                     int voiceNum = std::stoi(message->voice.c_str());
                     if (voiceNum >= 0 && voiceNum <= 4) {
@@ -234,11 +194,11 @@ void AppVoice::_loop() {
                     }
                 }
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceVoiceText(
-                        _getVoiceTextApiKey(), message->text.c_str(), params));
+                        _settings->getVoiceTextApiKey(), message->text.c_str(), params));
             } else {
                 // Google Translate TTS
                 UrlParams params;
-                params["tl"] = _getVoiceLang();
+                params["tl"] = _settings->getLang().c_str();
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceGoogleTranslateTts(
                         message->text.c_str(), params));
             }
@@ -249,34 +209,4 @@ void AppVoice::_loop() {
         }
         delay(200);
     }
-}
-
-uint8_t AppVoice::_getVoiceVolume() {
-    return (uint8_t) (_settings->get(CONFIG_VOICE_VOLUME_KEY) | CONFIG_VOICE_VOLUME_DEFAULT);
-}
-
-const char *AppVoice::_getVoiceLang() {
-    return (const char *) (_settings->get(CONFIG_VOICE_LANG_KEY) | CONFIG_VOICE_LANG_DEFAULT);
-}
-
-const char *AppVoice::_getVoiceService() {
-    return _settings->get(CONFIG_VOICE_SERVICE_KEY) | CONFIG_VOICE_SERVICE_DEFAULT;
-}
-
-const char *AppVoice::_getVoiceTextApiKey() {
-    return _settings->get(CONFIG_VOICE_VOICETEXT_APIKEY_KEY);
-}
-
-const char *AppVoice::_getVoiceTextParams() {
-    return (const char *) (_settings->get(CONFIG_VOICE_VOICETEXT_PARAMS_KEY)
-                           | CONFIG_VOICE_VOICETEXT_PARAMS_DEFAULT);
-}
-
-const char *AppVoice::_getTtsQuestVoicevoxApiKey() {
-    return _settings->get(CONFIG_VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY);
-}
-
-const char *AppVoice::_getTtsQuestVoicevoxParams() {
-    return (const char *) (_settings->get(CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY)
-                           | CONFIG_VOICE_TTS_QUEST_VOICEVOX_PARAMS_DEFAULT);
 }

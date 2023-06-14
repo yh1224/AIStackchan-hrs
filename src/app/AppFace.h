@@ -9,13 +9,13 @@
 
 #undef SUPPRESS_HPP_WARNING
 
+#include "app/AppSettings.h"
 #include "app/AppVoice.h"
-#include "lib/NvsSettings.h"
 
 class AppFace {
 public:
     explicit AppFace(
-            std::shared_ptr<NvsSettings> settings,
+            std::shared_ptr<AppSettings> settings,
             std::shared_ptr<AppVoice> voice
     ) : _settings(std::move(settings)),
         _voice(std::move(voice)) {};
@@ -41,7 +41,7 @@ public:
     void toggleHeadSwing();
 
 private:
-    std::shared_ptr<NvsSettings> _settings;
+    std::shared_ptr<AppSettings> _settings;
     std::shared_ptr<AppVoice> _voice;
 
     /// M5Stack-Avatar https://github.com/meganetaaan/m5stack-avatar
@@ -55,14 +55,6 @@ private:
 
     /// head swing mode
     bool _headSwing;
-
-    bool _isServoEnabled();
-
-    std::pair<int, int> _getServoPin();
-
-    std::pair<int, int> _getSwingHome();
-
-    std::pair<int, int> _getSwingRange();
 };
 
 #endif // !defined(APP_FACE_H)

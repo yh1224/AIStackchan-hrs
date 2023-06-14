@@ -7,13 +7,13 @@
 #include <ArduinoJson.h>
 
 #include "app/AppFace.h"
+#include "app/AppSettings.h"
 #include "app/AppVoice.h"
-#include "lib/NvsSettings.h"
 
 class AppChat {
 public:
     explicit AppChat(
-            std::shared_ptr<NvsSettings> settings,
+            std::shared_ptr<AppSettings> settings,
             std::shared_ptr<AppVoice> voice,
             std::shared_ptr<AppFace> face
     ) : _settings(std::move(settings)),
@@ -23,14 +23,6 @@ public:
     void setup();
 
     void start();
-
-    std::vector<String> getChatRoles();
-
-    bool setOpenAiApiKey(const String &apiKey);
-
-    bool addRole(const String &role);
-
-    bool clearRoles();
 
     void toggleRandomSpeakMode();
 
@@ -43,7 +35,7 @@ public:
     String talk(const String &text, const String &voiceName, bool useHistory);
 
 private:
-    std::shared_ptr<NvsSettings> _settings;
+    std::shared_ptr<AppSettings> _settings;
     std::shared_ptr<AppVoice> _voice;
     std::shared_ptr<AppFace> _face;
 
@@ -66,25 +58,11 @@ private:
     /// chat history (questions and answers)
     std::deque<String> _chatHistory;
 
-    String _getLang();
-
-    const char *_getOpenAiApiKey();
-
-    const char *_getChatGptModel();
-
-    bool _useStream();
-
-    int _getMaxHistory();
-
     unsigned long _getRandomSpeakNextTime();
 
     String _getRandomSpeakQuestion();
 
-    bool _isRandomSpeakEnabled();
-
     bool _isRandomSpeakTimeNow(unsigned long now);
-
-    bool _isClockSpeakEnabled();
 
     bool _isClockSpeakTimeNow();
 

@@ -6,7 +6,6 @@
 #include "app/AppChat.h"
 #include "app/AppFace.h"
 #include "app/AppVoice.h"
-#include "app/config.h"
 #include "app/lang.h"
 #include "lib/ChatGptClient.h"
 #include "lib/utils.h"
@@ -34,36 +33,16 @@ void AppChat::start() {
     );
 }
 
-std::vector<String> AppChat::getChatRoles() {
-    return _settings->getArray<String>(CONFIG_CHAT_OPENAI_ROLES_KEY);
-}
-
-bool AppChat::setOpenAiApiKey(const String &apiKey) {
-    if (apiKey == "") {
-        return _settings->remove(CONFIG_CHAT_OPENAI_APIKEY_KEY);
-    } else {
-        return _settings->set(CONFIG_CHAT_OPENAI_APIKEY_KEY, apiKey);
-    }
-}
-
-bool AppChat::addRole(const String &role) {
-    return _settings->add(CONFIG_CHAT_OPENAI_ROLES_KEY, role);
-}
-
-bool AppChat::clearRoles() {
-    return _settings->clear(CONFIG_CHAT_OPENAI_ROLES_KEY);
-}
-
 void AppChat::toggleRandomSpeakMode() {
     xSemaphoreTake(_lock, portMAX_DELAY);
     String message;
     if (!_randomSpeakMode) {
         _randomSpeakMode = true;
         _randomSpeakNextTime = _getRandomSpeakNextTime();
-        message = String(t(_getLang().c_str(), "chat_random_started"));
+        message = String(t(_settings->getLang().c_str(), "chat_random_started"));
     } else {
         _randomSpeakMode = false;
-        message = String(t(_getLang().c_str(), "chat_random_stopped"));
+        message = String(t(_settings->getLang().c_str(), "chat_random_stopped"));
     }
     xSemaphoreGive(_lock);
     _voice->stopSpeak();
@@ -80,15 +59,15 @@ void AppChat::speakCurrentTime() {
     if (getLocalTime(&tm)) {
         const char *format;
         if (tm.tm_min == 0) {
-            format = t(_getLang().c_str(), "clock_now_noon");
+            format = t(_settings->getLang().c_str(), "clock_now_noon");
         } else {
-            format = t(_getLang().c_str(), "clock_now");
+            format = t(_settings->getLang().c_str(), "clock_now");
         }
         char messageBuf[strlen(format) + 1];
         snprintf(messageBuf, sizeof(messageBuf), format, tm.tm_hour, tm.tm_min);
         message = String(messageBuf);
     } else {
-        t(_getLang().c_str(), "clock_not_set");
+        t(_settings->getLang().c_str(), "clock_not_set");
     }
     _voice->stopSpeak();
     _voice->speak(message, "");
@@ -108,40 +87,16 @@ String AppChat::talk(const String &text, const String &voiceName, bool useHistor
     return answer;
 }
 
-String AppChat::_getLang() {
-    String lang = _settings->get(CONFIG_VOICE_LANG_KEY) | CONFIG_VOICE_LANG_DEFAULT;
-    return lang.substring(0, 2); // en-US -> en
-}
-
-const char *AppChat::_getOpenAiApiKey() {
-    return _settings->get(CONFIG_CHAT_OPENAI_APIKEY_KEY);
-}
-
-const char *AppChat::_getChatGptModel() {
-    return _settings->get(CONFIG_CHAT_OPENAI_CHATGPT_MODEL_KEY) | CONFIG_CHAT_OPENAI_CHATGPT_MODEL_DEFAULT;
-}
-
-bool AppChat::_useStream() {
-    return _settings->get(CONFIG_CHAT_OPENAI_STREAM_KEY) | CONFIG_CHAT_OPENAI_STREAM_DEFAULT;
-}
-
-int AppChat::_getMaxHistory() {
-    return _settings->get(CONFIG_CHAT_OPENAI_MAX_HISTORY_KEY) | CONFIG_CHAT_OPENAI_MAX_HISTORY_DEFAULT;
-}
-
 unsigned long AppChat::_getRandomSpeakNextTime() {
-    int min = _settings->get(CONFIG_CHAT_RANDOM_INTERVAL_MIN_KEY) | CONFIG_CHAT_RANDOM_INTERVAL_MIN_DEFAULT;
-    int max = _settings->get(CONFIG_CHAT_RANDOM_INTERVAL_MAX_KEY) | CONFIG_CHAT_RANDOM_INTERVAL_MAX_DEFAULT;
+    auto interval = _settings->getChatRandomInterval();
+    int min = interval.first;
+    int max = interval.second;
     return millis() + ((unsigned long) random(min, max)) * 1000;
 }
 
 String AppChat::_getRandomSpeakQuestion() {
-    auto questions = _settings->getArray<String>(CONFIG_CHAT_RANDOM_QUESTIONS_KEY);
+    auto questions = _settings->getChatRandomQuestions();
     return questions[(int) random((int) questions.size())];
-}
-
-bool AppChat::_isRandomSpeakEnabled() {
-    return _settings->has(CONFIG_CHAT_RANDOM_QUESTIONS_KEY);
 }
 
 bool AppChat::_isRandomSpeakTimeNow(unsigned long now) {
@@ -152,14 +107,10 @@ bool AppChat::_isRandomSpeakTimeNow(unsigned long now) {
     return false;
 }
 
-bool AppChat::_isClockSpeakEnabled() {
-    return _settings->has(CONFIG_CHAT_CLOCK_HOURS_KEY);
-}
-
 bool AppChat::_isClockSpeakTimeNow() {
     struct tm tm{};
     if (getLocalTime(&tm) && tm.tm_min == 0 && tm.tm_sec == 0) {
-        auto hours = _settings->getArray<int>(CONFIG_CHAT_CLOCK_HOURS_KEY);
+        auto hours = _settings->getChatClockHours();
         for (auto hour: hours) {
             if (hour == tm.tm_hour) {
                 return true;
@@ -192,25 +143,25 @@ void AppChat::_setFace(m5avatar::Expression expression, const String &text, int 
  * @return answer (nullptr: error)
  */
 String AppChat::_talk(const String &text, const String &voiceName, bool useHistory) {
-    auto apiKey = _getOpenAiApiKey();
+    auto apiKey = _settings->getOpenAiApiKey();
     if (apiKey == nullptr) {
-        String message = t(_getLang().c_str(), "apikey_not_set");
+        String message = t(_settings->getLang().c_str(), "apikey_not_set");
         _voice->speak(message, voiceName);
         return message;
     }
 
-    ChatGptClient client{apiKey, _getChatGptModel()};
-    _setFace(m5avatar::Expression::Doubt, t(_getLang().c_str(), "chat_thinking..."));
+    ChatGptClient client{apiKey, _settings->getChatGptModel()};
+    _setFace(m5avatar::Expression::Doubt, t(_settings->getLang().c_str(), "chat_thinking..."));
 
     // call ChatGPT
     try {
         std::deque<String> noHistory;
         String response;
-        if (_useStream()) {
+        if (_settings->useChatGptStream()) {
             std::stringstream ss;
             int index = 0;
             response = client.chat(
-                    text, getChatRoles(), useHistory ? _chatHistory : noHistory,
+                    text, _settings->getChatRoles(), useHistory ? _chatHistory : noHistory,
                     [&](const String &body) {
                         //Serial.printf("%s", body.c_str());
                         ss << body.c_str();
@@ -229,7 +180,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
                 _voice->speak(sentences[i].c_str(), voiceName);
             }
         } else {
-            response = client.chat(text, getChatRoles(), useHistory ? _chatHistory : noHistory, nullptr);
+            response = client.chat(text, _settings->getChatRoles(), useHistory ? _chatHistory : noHistory, nullptr);
             //Serial.printf("%s\n", response.c_str());
             _setFace(m5avatar::Expression::Neutral, "");
             _voice->speak(response, voiceName);
@@ -237,7 +188,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
 
         if (useHistory) {
             // チャット履歴が最大数を超えた場合、古い質問と回答を削除
-            if (_chatHistory.size() > _getMaxHistory() * 2) {
+            if (_chatHistory.size() > _settings->getMaxHistory() * 2) {
                 _chatHistory.pop_front();
                 _chatHistory.pop_front();
             }
@@ -257,7 +208,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
             errorMessage = "Error";
         }
         _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
-        _voice->speak(t(_getLang().c_str(), "chat_i_dont_understand"), voiceName);
+        _voice->speak(t(_settings->getLang().c_str(), "chat_i_dont_understand"), voiceName);
         return errorMessage;
     }
 }
@@ -273,7 +224,7 @@ void AppChat::_loop() {
     }
 
     if (!_voice->isPlaying() && xSemaphoreTake(_lock, 1) == pdTRUE) {
-        if (_isClockSpeakEnabled() && _isClockSpeakTimeNow()) {
+        if (_settings->isClockSpeakEnabled() && _isClockSpeakTimeNow()) {
             // clock speak mode
             speakCurrentTime();
         } else if (_randomSpeakMode && _isRandomSpeakTimeNow(now)) {

@@ -6,9 +6,9 @@
 #include <AudioFileSourceBuffer.h>
 #include <AudioGeneratorMP3.h>
 
+#include "app/AppSettings.h"
 #include "lib/AudioFileSourceVoiceText.h"
 #include "lib/AudioOutputM5Speaker.hpp"
-#include "lib/NvsSettings.h"
 
 class SpeechMessage {
 public:
@@ -20,7 +20,7 @@ public:
 class AppVoice {
 public:
     explicit AppVoice(
-            std::shared_ptr<NvsSettings> settings
+            std::shared_ptr<AppSettings> settings
     ) : _settings(std::move(settings)) {};
 
     bool init();
@@ -33,12 +33,6 @@ public:
 
     bool isPlaying();
 
-    bool setVoiceTextApiKey(const String &apiKey);
-
-    bool setTtsQuestVoicevoxApiKey(const String &apiKey);
-
-    bool setVolume(uint8_t volume);
-
     bool setVoiceName(const String &voiceName);
 
     void speak(const String &text, const String &voiceName);
@@ -46,7 +40,7 @@ public:
     void stopSpeak();
 
 private:
-    std::shared_ptr<NvsSettings> _settings;
+    std::shared_ptr<AppSettings> _settings;
 
     TaskHandle_t _taskHandle{};
 
@@ -76,20 +70,6 @@ private:
     std::unique_ptr<uint8_t> _allocatedBuffer;
 
     void _loop();
-
-    uint8_t _getVoiceVolume();
-
-    const char *_getVoiceLang();
-
-    const char *_getVoiceService();
-
-    const char *_getVoiceTextApiKey();
-
-    const char *_getVoiceTextParams();
-
-    const char *_getTtsQuestVoicevoxApiKey();
-
-    const char *_getTtsQuestVoicevoxParams();
 };
 
 #endif // !defined(APP_VOICE_H)

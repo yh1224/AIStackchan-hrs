@@ -36,7 +36,7 @@ public:
 
     bool clear(const String &keyStr);
 
-private:
+protected:
     String _nvsNamespace;
     String _nvsKey;
 

@@ -2,7 +2,6 @@
 #include <M5Unified.h>
 
 #include "app/App.h"
-#include "app/config.h"
 #include "lib/network.h"
 #include "lib/sdcard.h"
 
@@ -52,8 +51,8 @@ void App::setup() {
     }
 
     // Connect
-    const char *wifiSsid = _settings->get(CONFIG_NETWORK_WIFI_SSID_KEY);
-    const char *wifiPass = _settings->get(CONFIG_NETWORK_WIFI_PASS_KEY);
+    const char *wifiSsid = _settings->getNetworkWifiSsid();
+    const char *wifiPass = _settings->getNetworkWifiPass();
     if (!connectNetwork(wifiSsid, wifiPass)) {
         Serial.println("ERROR: Failed to connect network. Rebooting...");
         delay(5000);
@@ -62,15 +61,15 @@ void App::setup() {
     }
 
     // Setup mDNS
-    const char *mDnsHostname = _settings->get(CONFIG_NETWORK_HOSTNAME_KEY);
+    const char *mDnsHostname = _settings->getNetworkHostname();
     if (mDnsHostname != nullptr) {
         Serial.printf("Setting up mDNS hostname: %s\n", mDnsHostname);
         setMDnsHostname(mDnsHostname);
     }
 
     // Synchronize time
-    const char *tz = _settings->get(CONFIG_TIME_ZONE_KEY) | CONFIG_TIME_ZONE_DEFAULT;
-    const char *ntpServer = _settings->get(CONFIG_TIME_NTP_SERVER_KEY) | CONFIG_TIME_NTP_SERVER_DEFAULT;
+    const char *tz = _settings->getTimeZone();
+    const char *ntpServer = _settings->getTimeNtpServer();
     if (tz != nullptr && ntpServer != nullptr) {
         Serial.printf("Synchronizing time: %s (%s)\n", ntpServer, tz);
         syncTime(tz, ntpServer);

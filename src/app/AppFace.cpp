@@ -4,7 +4,6 @@
 
 #include "app/AppFace.h"
 #include "app/AppVoice.h"
-#include "app/config.h"
 
 /// Avatar expression list
 static const m5avatar::Expression EXPRESSIONS[] = {
@@ -20,14 +19,14 @@ static const m5avatar::Expression EXPRESSIONS[] = {
 #pragma ide diagnostic ignored "EndlessLoop"
 
 bool AppFace::init() {
-    auto pin = _getServoPin();
+    auto pin = _settings->getServoPin();
     int servoPinX = pin.first;
     int servoPinY = pin.second;
-    if (_isServoEnabled() && servoPinX != 0 && servoPinY != 0) {
-        auto home = _getSwingHome();
+    if (_settings->isServoEnabled() && servoPinX != 0 && servoPinY != 0) {
+        auto home = _settings->getSwingHome();
         _homeX = home.first;
         _homeY = home.second;
-        auto range = _getSwingRange();
+        auto range = _settings->getSwingRange();
         _rangeX = range.first;
         _rangeY = range.second;
         if (0 == _servoX.attach(
@@ -68,7 +67,7 @@ void AppFace::setup() {
 void AppFace::start() {
     static auto face = this;
     _avatar.addTask([](void *args) { face->lipSync(args); }, "lipSync");
-    if (_isServoEnabled()) {
+    if (_settings->isServoEnabled()) {
         _avatar.addTask([](void *args) { face->servo(args); }, "servo");
     }
 }
@@ -156,26 +155,4 @@ bool AppFace::setExpressionIndex(int expressionIndex) {
  */
 void AppFace::toggleHeadSwing() {
     _headSwing = !_headSwing;
-}
-
-bool AppFace::_isServoEnabled() {
-    return (bool) _settings->has("servo");
-}
-
-std::pair<int, int> AppFace::_getServoPin() {
-    int servoPinX = _settings->get(CONFIG_SERVO_PIN_X_KEY);
-    int servoPinY = _settings->get(CONFIG_SERVO_PIN_Y_KEY);
-    return std::make_pair(servoPinX, servoPinY);
-}
-
-std::pair<int, int> AppFace::_getSwingHome() {
-    int homeX = _settings->get(CONFIG_SWING_HOME_X_KEY) | CONFIG_SWING_HOME_X_DEFAULT;
-    int homeY = _settings->get(CONFIG_SWING_HOME_Y_KEY) | CONFIG_SWING_HOME_Y_DEFAULT;
-    return std::make_pair(homeX, homeY);
-}
-
-std::pair<int, int> AppFace::_getSwingRange() {
-    int homeX = _settings->get(CONFIG_SWING_RANGE_X_KEY) | CONFIG_SWING_RANGE_X_DEFAULT;
-    int homeY = _settings->get(CONFIG_SWING_RANGE_Y_KEY) | CONFIG_SWING_RANGE_Y_DEFAULT;
-    return std::make_pair(homeX, homeY);
 }
