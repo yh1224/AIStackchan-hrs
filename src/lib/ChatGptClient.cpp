@@ -8,9 +8,6 @@
 #include "lib/ChatGptClient.h"
 #include "lib/utils.h"
 
-/// GPT model
-static const char *CHATGPT_MODEL = "gpt-3.5-turbo";
-
 /// Chat API URL
 static const char *CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -43,7 +40,7 @@ static const char *caCert = \
 "-----END CERTIFICATE-----\n" \
 "";
 
-ChatGptClient::ChatGptClient(String apiKey) : _apiKey(std::move(apiKey)) {}
+ChatGptClient::ChatGptClient(String apiKey, String model) : _apiKey(std::move(apiKey)), _model(std::move(model)) {}
 
 /**
  * Ask to the ChatGPT and get answer
@@ -60,7 +57,7 @@ String ChatGptClient::chat(
         const std::function<void(const String &)> &onReceiveContent) {
     DynamicJsonDocument requestDoc{CONTENT_MAX_SIZE};
     DynamicJsonDocument responseDoc{CONTENT_MAX_SIZE};
-    requestDoc["model"] = CHATGPT_MODEL;
+    requestDoc["model"] = _model;
     if (onReceiveContent != nullptr) {
         requestDoc["stream"] = true;
     }

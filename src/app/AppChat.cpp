@@ -117,6 +117,10 @@ const char *AppChat::_getOpenAiApiKey() {
     return _settings->get(CONFIG_CHAT_OPENAI_APIKEY_KEY);
 }
 
+const char *AppChat::_getChatGptModel() {
+    return _settings->get(CONFIG_CHAT_OPENAI_CHATGPT_MODEL_KEY) | CONFIG_CHAT_OPENAI_CHATGPT_MODEL_DEFAULT;
+}
+
 bool AppChat::_useStream() {
     return _settings->get(CONFIG_CHAT_OPENAI_STREAM_KEY) | CONFIG_CHAT_OPENAI_STREAM_DEFAULT;
 }
@@ -195,7 +199,7 @@ String AppChat::_talk(const String &text, bool useHistory) {
         return message;
     }
 
-    ChatGptClient client{apiKey};
+    ChatGptClient client{apiKey, _getChatGptModel()};
     _setFace(m5avatar::Expression::Doubt, t(_getLang().c_str(), "chat_thinking..."));
 
     // call ChatGPT

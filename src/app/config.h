@@ -33,6 +33,8 @@
 #define CONFIG_CHAT_OPENAI_STREAM_KEY "chat.openai.stream"
 #define CONFIG_CHAT_OPENAI_STREAM_DEFAULT true
 #define CONFIG_CHAT_OPENAI_APIKEY_KEY "chat.openai.apiKey"
+#define CONFIG_CHAT_OPENAI_CHATGPT_MODEL_KEY "chat.openai.model"
+#define CONFIG_CHAT_OPENAI_CHATGPT_MODEL_DEFAULT "gpt-3.5-turbo-0613"
 #define CONFIG_CHAT_OPENAI_ROLES_KEY "chat.openai.roles"
 #define CONFIG_CHAT_OPENAI_MAX_HISTORY_KEY "chat.openai.maxHistory"
 #define CONFIG_CHAT_OPENAI_MAX_HISTORY_DEFAULT 10

@@ -28,7 +28,7 @@ private:
 
 class ChatGptClient {
 public:
-    explicit ChatGptClient(String apiKey);
+    explicit ChatGptClient(String apiKey, String model);
 
     String chat(
             const String &data, const std::vector<String> &roles, const std::deque<String> &history,
@@ -36,6 +36,7 @@ public:
 
 private:
     String _apiKey;
+    String _model;
 
     String _httpPost(
             const String &url, const String &body,

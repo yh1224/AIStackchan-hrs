@@ -70,6 +70,8 @@ private:
 
     const char *_getOpenAiApiKey();
 
+    const char * _getChatGptModel();
+
     bool _useStream();
 
     int _getMaxHistory();
