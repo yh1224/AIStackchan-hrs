@@ -1,10 +1,12 @@
 #if !defined(APP_FACE_H)
 #define APP_FACE_H
 
+#if !defined(WITHOUT_AVATAR)
 #include <Avatar.h>
 #define SUPPRESS_HPP_WARNING
 #include <ServoEasing.h>
 #undef SUPPRESS_HPP_WARNING
+#endif // !defined(WITHOUT_AVATAR)
 
 #include "app/AppSettings.h"
 #include "app/AppVoice.h"
@@ -48,6 +50,7 @@ private:
     std::shared_ptr<AppSettings> _settings;
     std::shared_ptr<AppVoice> _voice;
 
+#if !defined(WITHOUT_AVATAR)
     /// M5Stack-Avatar https://github.com/meganetaaan/m5stack-avatar
     m5avatar::Avatar _avatar;
 
@@ -59,6 +62,7 @@ private:
 
     /// head swing mode
     bool _headSwing;
+#endif // !defined(WITHOUT_AVATAR)
 };
 
 #endif // !defined(APP_FACE_H)

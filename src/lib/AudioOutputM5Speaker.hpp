@@ -2,6 +2,7 @@
 #define AudioOutputM5Speaker_H
 
 #include <AudioOutput.h>
+#include <M5Unified.h>
 
 static const int BUF_SIZE = 640;
 static const int BUF_NUM = 3;
