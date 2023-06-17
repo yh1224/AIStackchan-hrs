@@ -29,23 +29,25 @@ bool AppFace::init() {
         auto range = _settings->getSwingRange();
         _rangeX = range.first;
         _rangeY = range.second;
-        if (0 == _servoX.attach(
+        auto retX = _servoX.attach(
                 servoPinX,
                 _homeX,
                 DEFAULT_MICROSECONDS_FOR_0_DEGREE,
                 DEFAULT_MICROSECONDS_FOR_180_DEGREE
-        )) {
+        );
+        if (retX == 0 || retX == INVALID_SERVO) {
             Serial.println("ERROR: Failed to attach servo x.");
         }
         _servoX.setEasingType(EASE_QUADRATIC_IN_OUT);
         _servoX.setEaseTo(_homeX);
 
-        if (0 == _servoY.attach(
+        auto retY = _servoY.attach(
                 servoPinY,
                 _homeY,
                 DEFAULT_MICROSECONDS_FOR_0_DEGREE,
                 DEFAULT_MICROSECONDS_FOR_180_DEGREE
-        )) {
+        );
+        if (retY == 0 || retY == INVALID_SERVO) {
             Serial.println("ERROR: Failed to attach servo y.");
         }
         _servoY.setEasingType(EASE_QUADRATIC_IN_OUT);
