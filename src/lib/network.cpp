@@ -20,13 +20,16 @@ bool connectNetwork(const char *ssid, const char *passphrase) {
     bool manualConfig = ssid != nullptr && passphrase != nullptr;
     if (manualConfig) {
         M5.Display.printf("SSID: %s\n", ssid);
+        Serial.printf("SSID: %s\n", ssid);
         WiFi.begin(ssid, passphrase);
     } else {
         WiFi.begin();
     }
     M5.Display.print("Connecting");
+    Serial.print("Connecting");
     while (WiFiClass::status() != WL_CONNECTED) {
         M5.Display.print(".");
+        Serial.print(".");
         delay(500);
         // Give up in 10 seconds
         if (10000 < millis()) {
@@ -34,6 +37,7 @@ bool connectNetwork(const char *ssid, const char *passphrase) {
         }
     }
     M5.Display.println("");
+    Serial.println("");
 
     if (WiFiClass::status() != WL_CONNECTED) {
         if (manualConfig) {
@@ -43,31 +47,39 @@ bool connectNetwork(const char *ssid, const char *passphrase) {
         // Try autoconfiguration by SmartConfig
         WiFiClass::mode(WIFI_STA);
         WiFi.beginSmartConfig();
-        M5.Display.println("Waiting for SmartConfig");
+        M5.Display.printf("SmartConfig: ");
+        Serial.printf("SmartConfig: ");
         while (!WiFi.smartConfigDone()) {
             delay(500);
             M5.Display.print("#");
+            Serial.print("#");
             // Give up in 30 seconds
             if (30000 < millis()) {
+                M5.Display.println("");
+                Serial.println("");
                 return false;
             }
         }
         M5.Display.println("");
+        Serial.println("");
 
         // Wait for connection
-        M5.Display.println("Waiting for WiFi");
+        M5.Display.println("Connecting");
+        Serial.println("Connecting");
         while (WiFiClass::status() != WL_CONNECTED) {
             delay(500);
             M5.Display.print(".");
+            Serial.print(".");
             // Give up in 60 seconds.
             if (60000 < millis()) {
+                M5.Display.println("");
+                Serial.println("");
                 return false;
             }
         }
     }
-    M5.Display.println("Connected");
-    M5.Display.print("IP: ");
-    M5.Display.println(WiFi.localIP());
+    M5.Display.printf("Connected\nIP: %s\n", WiFi.localIP().toString().c_str());
+    Serial.printf("Connected\nIP: %s\n", WiFi.localIP().toString().c_str());
 
     delay(3000);
     return true;
