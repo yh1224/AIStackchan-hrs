@@ -44,11 +44,8 @@ void App::setup() {
     }
 
     // Initialize
-    if (!_voice->init() || !_face->init()) {
-        Serial.println("ERROR: Failed to initialize.");
-        delay(5000);
-        halt();
-    }
+    _voice->init();
+    _face->init();
 
     // Connect
     const char *wifiSsid = _settings->getNetworkWifiSsid();
