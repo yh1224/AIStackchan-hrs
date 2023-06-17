@@ -5,16 +5,6 @@
 #include "app/AppFace.h"
 #include "app/AppVoice.h"
 
-/// Avatar expression list
-static const m5avatar::Expression EXPRESSIONS[] = {
-        m5avatar::Expression::Neutral,
-        m5avatar::Expression::Happy,
-        m5avatar::Expression::Sleepy,
-        m5avatar::Expression::Doubt,
-        m5avatar::Expression::Sad,
-        m5avatar::Expression::Angry,
-};
-
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
 
@@ -132,23 +122,22 @@ void AppFace::setText(const char *text) {
  *
  * @param expression expression
  */
-void AppFace::setExpression(m5avatar::Expression expression) {
-    _avatar.setExpression(expression);
-}
-
-/**
- * Set face expression (by index)
- *
- * @param expressionIndex expression index
- */
-bool AppFace::setExpressionIndex(int expressionIndex) {
+bool AppFace::setExpression(Expression expression) {
+    static const m5avatar::Expression EXPRESSIONS[] = {
+            m5avatar::Expression::Neutral,
+            m5avatar::Expression::Happy,
+            m5avatar::Expression::Sleepy,
+            m5avatar::Expression::Doubt,
+            m5avatar::Expression::Sad,
+            m5avatar::Expression::Angry,
+    };
     int numExpressions = sizeof(EXPRESSIONS) / sizeof(EXPRESSIONS[0]);
-    if (expressionIndex < 0 || expressionIndex >= numExpressions) {
-        Serial.printf("ERROR: Unknown expression: %d", expressionIndex);
+    if (expression >= numExpressions) {
+        Serial.printf("ERROR: Unknown expression: %d", expression);
         return false;
     }
-    Serial.printf("Setting expression: %d\n", expressionIndex);
-    _avatar.setExpression(EXPRESSIONS[expressionIndex]);
+    Serial.printf("Setting expression: %d\n", expression);
+    _avatar.setExpression(EXPRESSIONS[expression]);
     return true;
 }
 

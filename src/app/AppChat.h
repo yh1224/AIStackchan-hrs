@@ -66,11 +66,11 @@ private:
 
     bool _isClockSpeakTimeNow();
 
-    void _setFace(m5avatar::Expression expression, const char *text) {
+    void _setFace(Expression expression, const char *text) {
         _setFace(expression, text, -1);
     }
 
-    void _setFace(m5avatar::Expression expression, const String &text, int duration);
+    void _setFace(Expression expression, const String &text, int duration);
 
     String _talk(const String &text, const String &voiceName, bool useHistory);
 

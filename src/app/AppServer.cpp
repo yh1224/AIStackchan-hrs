@@ -36,7 +36,7 @@ void AppServer::_onSpeech() {
     auto message = _httpServer.arg("say");
     auto expressionStr = _httpServer.arg("expression");
     auto voice = _httpServer.arg("voice");
-    if (!_face->setExpressionIndex(expressionStr.toInt())) {
+    if (!_face->setExpression((Expression) expressionStr.toInt())) {
         _httpServer.send(400);
     }
     _voice->stopSpeak();
@@ -46,7 +46,7 @@ void AppServer::_onSpeech() {
 
 void AppServer::_onFace() {
     auto expressionStr = _httpServer.arg("expression");
-    if (!_face->setExpressionIndex(expressionStr.toInt())) {
+    if (!_face->setExpression((Expression) expressionStr.toInt())) {
         _httpServer.send(400);
     }
     _httpServer.send(200, "text/plain", "OK");

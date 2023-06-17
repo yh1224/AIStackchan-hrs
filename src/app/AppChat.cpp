@@ -47,7 +47,7 @@ void AppChat::toggleRandomSpeakMode() {
     xSemaphoreGive(_lock);
     _voice->stopSpeak();
     _voice->speak(message, "");
-    _setFace(m5avatar::Expression::Happy, "", 3000);
+    _setFace(Expression::Happy, "", 3000);
 }
 
 /**
@@ -127,7 +127,7 @@ bool AppChat::_isClockSpeakTimeNow() {
  * @param text text
  * @param duration delay to hide balloon (0: no hide)
  */
-void AppChat::_setFace(m5avatar::Expression expression, const String &text, int duration) {
+void AppChat::_setFace(Expression expression, const String &text, int duration) {
     _face->setExpression(expression);
     _face->setText("");
     _balloonText = text;
@@ -151,7 +151,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
     }
 
     ChatGptClient client{apiKey, _settings->getChatGptModel()};
-    _setFace(m5avatar::Expression::Doubt, t(_settings->getLang().c_str(), "chat_thinking..."));
+    _setFace(Expression::Doubt, t(_settings->getLang().c_str(), "chat_thinking..."));
 
     // call ChatGPT
     try {
@@ -167,14 +167,14 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
                         ss << body.c_str();
                         auto sentences = splitSentence(ss.str());
                         if (sentences.size() > (index + 1)) {
-                            _setFace(m5avatar::Expression::Neutral, "");
+                            _setFace(Expression::Neutral, "");
                             for (int i = index; i < sentences.size() - 1; i++) {
                                 _voice->speak(sentences[i].c_str(), voiceName);
                                 index++;
                             }
                         }
                     });
-            _setFace(m5avatar::Expression::Neutral, "");
+            _setFace(Expression::Neutral, "");
             auto sentences = splitSentence(response.c_str());
             for (int i = index; i < sentences.size(); i++) {
                 _voice->speak(sentences[i].c_str(), voiceName);
@@ -182,7 +182,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
         } else {
             response = client.chat(text, _settings->getChatRoles(), useHistory ? _chatHistory : noHistory, nullptr);
             //Serial.printf("%s\n", response.c_str());
-            _setFace(m5avatar::Expression::Neutral, "");
+            _setFace(Expression::Neutral, "");
             _voice->speak(response, voiceName);
         }
 
@@ -207,7 +207,7 @@ String AppChat::_talk(const String &text, const String &voiceName, bool useHisto
         } catch (std::exception &e) {
             errorMessage = "Error";
         }
-        _setFace(m5avatar::Expression::Sad, errorMessage, 3000);
+        _setFace(Expression::Sad, errorMessage, 3000);
         _voice->speak(t(_settings->getLang().c_str(), "chat_i_dont_understand"), voiceName);
         return errorMessage;
     }
@@ -218,7 +218,7 @@ void AppChat::_loop() {
 
     // reset balloon and face
     if (_hideBalloon >= 0 && now > _hideBalloon) {
-        _face->setExpression(m5avatar::Expression::Neutral);
+        _face->setExpression(Expression::Neutral);
         _face->setText("");
         _hideBalloon = -1;
     }

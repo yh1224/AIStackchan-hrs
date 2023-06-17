@@ -2,15 +2,21 @@
 #define APP_FACE_H
 
 #include <Avatar.h>
-
 #define SUPPRESS_HPP_WARNING
-
 #include <ServoEasing.h>
-
 #undef SUPPRESS_HPP_WARNING
 
 #include "app/AppSettings.h"
 #include "app/AppVoice.h"
+
+typedef enum {
+    Neutral = 0,
+    Happy,
+    Sleepy,
+    Doubt,
+    Sad,
+    Angry,
+} Expression;
 
 class AppFace {
 public:
@@ -34,9 +40,7 @@ public:
 
     void setText(const char *text);
 
-    void setExpression(m5avatar::Expression expression);
-
-    bool setExpressionIndex(int expressionIndex);
+    bool setExpression(Expression expression);
 
     void toggleHeadSwing();
 
