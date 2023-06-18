@@ -15,6 +15,8 @@ public:
     explicit AppSettings(String nvsNamespace, String nvsKey)
             : NvsSettings(std::move(nvsNamespace), std::move(nvsKey)) {}
 
+    bool init();
+
     const char *getNetworkWifiSsid();
 
     const char *getNetworkWifiPass();

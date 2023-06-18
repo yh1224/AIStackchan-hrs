@@ -5,9 +5,6 @@
 #include "lib/network.h"
 #include "lib/sdcard.h"
 
-/// File path for settings
-static const char *APP_SETTINGS_SD_PATH = "/settings.json";
-
 [[noreturn]] void halt() {
     while (true) { delay(1000); }
 }
@@ -32,15 +29,9 @@ void App::setup() {
     M5.Display.setCursor(0, 0);
 
     // Load settings
-    auto settings = sdLoadString(APP_SETTINGS_SD_PATH);
-    if (settings != nullptr) {
-        if (!_settings->load(*settings)) {
-            M5.Display.println("ERROR: Invalid settings.");
-            halt();
-        }
-        M5.Display.println("Settings loaded.");
-    } else {
-        _settings->load();
+    if (!_settings->init()) {
+        M5.Display.println("ERROR: Invalid settings.");
+        halt();
     }
 
     // Initialize

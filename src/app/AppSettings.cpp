@@ -1,54 +1,70 @@
 #include <Arduino.h>
 
 #include "AppSettings.h"
+#include "lib/sdcard.h"
 
-#define NETWORK_WIFI_SSID_KEY "network.wifi.ssid"
-#define NETWORK_WIFI_PASS_KEY "network.wifi.pass"
-#define NETWORK_HOSTNAME_KEY "network.hostname"
-#define TIME_ZONE_KEY "time.zone"
-#define TIME_ZONE_DEFAULT "JST-9"
-#define TIME_NTP_SERVER_KEY "time.ntpServer"
-#define TIME_NTP_SERVER_DEFAULT "ntp.nict.jp"
+/// File path for settings
+static const char *APP_SETTINGS_SD_PATH = "/settings.json";
 
-#define SERVO_KEY "servo"
-#define SERVO_PIN_X_KEY "servo.pin.x"
-#define SERVO_PIN_Y_KEY "servo.pin.y"
-#define SWING_HOME_X_KEY "swing.home.x"
-#define SWING_HOME_X_DEFAULT 90
-#define SWING_HOME_Y_KEY "swing.home.y"
-#define SWING_HOME_Y_DEFAULT 80
-#define SWING_RANGE_X_KEY "swing.range.x"
-#define SWING_RANGE_X_DEFAULT 30
-#define SWING_RANGE_Y_KEY "swing.range.y"
-#define SWING_RANGE_Y_DEFAULT 20
+static const char *NETWORK_WIFI_SSID_KEY = "network.wifi.ssid";
+static const char *NETWORK_WIFI_PASS_KEY = "network.wifi.pass";
+static const char *NETWORK_HOSTNAME_KEY = "network.hostname";
+static const char *TIME_ZONE_KEY = "time.zone";
+static const char *TIME_ZONE_DEFAULT = "JST-9";
+static const char *TIME_NTP_SERVER_KEY = "time.ntpServer";
+static const char *TIME_NTP_SERVER_DEFAULT = "ntp.nict.jp";
 
-#define VOICE_LANG_KEY "voice.lang"
-#define VOICE_LANG_DEFAULT "ja"
-#define VOICE_VOLUME_KEY "voice.volume"
-#define VOICE_VOLUME_DEFAULT 200
-#define VOICE_SERVICE_KEY "voice.service"
-#define VOICE_SERVICE_DEFAULT VOICE_SERVICE_GOOGLE_TRANSLATE_TTS
-#define VOICE_VOICETEXT_APIKEY_KEY "voice.voicetext.apiKey"
-#define VOICE_VOICETEXT_PARAMS_KEY "voice.voicetext.params"
-#define VOICE_VOICETEXT_PARAMS_DEFAULT "speaker=hikari&speed=120&pitch=130&emotion=happiness"
-#define VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY "voice.tts-quest-voicevox.apiKey"
-#define VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY "voice.tts-quest-voicevox.params"
-#define VOICE_TTS_QUEST_VOICEVOX_PARAMS_DEFAULT ""
+static const char *SERVO_KEY = "servo";
+static const char *SERVO_PIN_X_KEY = "servo.pin.x";
+static const char *SERVO_PIN_Y_KEY = "servo.pin.y";
+static const char *SWING_HOME_X_KEY = "swing.home.x";
+static const int SWING_HOME_X_DEFAULT = 90;
+static const char *SWING_HOME_Y_KEY = "swing.home.y";
+static const int SWING_HOME_Y_DEFAULT = 80;
+static const char *SWING_RANGE_X_KEY = "swing.range.x";
+static const int SWING_RANGE_X_DEFAULT = 30;
+static const char *SWING_RANGE_Y_KEY = "swing.range.y";
+static const int SWING_RANGE_Y_DEFAULT = 20;
 
-#define CHAT_OPENAI_APIKEY_KEY "chat.openai.apiKey"
-#define CHAT_OPENAI_CHATGPT_MODEL_KEY "chat.openai.model"
-#define CHAT_OPENAI_CHATGPT_MODEL_DEFAULT "gpt-3.5-turbo-0613"
-#define CHAT_OPENAI_STREAM_KEY "chat.openai.stream"
-#define CHAT_OPENAI_STREAM_DEFAULT true
-#define CHAT_OPENAI_ROLES_KEY "chat.openai.roles"
-#define CHAT_OPENAI_MAX_HISTORY_KEY "chat.openai.maxHistory"
-#define CHAT_OPENAI_MAX_HISTORY_DEFAULT 10
-#define CHAT_RANDOM_INTERVAL_MIN_KEY "chat.random.interval.min"
-#define CHAT_RANDOM_INTERVAL_MIN_DEFAULT 60
-#define CHAT_RANDOM_INTERVAL_MAX_KEY "chat.random.interval.min"
-#define CHAT_RANDOM_INTERVAL_MAX_DEFAULT 120
-#define CHAT_RANDOM_QUESTIONS_KEY "chat.random.questions"
-#define CHAT_CLOCK_HOURS_KEY "chat.clock.hours"
+static const char *VOICE_LANG_KEY = "voice.lang";
+static const char *VOICE_LANG_DEFAULT = "ja";
+static const char *VOICE_VOLUME_KEY = "voice.volume";
+static const int VOICE_VOLUME_DEFAULT = 200;
+static const char *VOICE_SERVICE_KEY = "voice.service";
+static const char *VOICE_SERVICE_DEFAULT = VOICE_SERVICE_GOOGLE_TRANSLATE_TTS;
+static const char *VOICE_VOICETEXT_APIKEY_KEY = "voice.voicetext.apiKey";
+static const char *VOICE_VOICETEXT_PARAMS_KEY = "voice.voicetext.params";
+static const char *VOICE_VOICETEXT_PARAMS_DEFAULT = "speaker=hikari&speed=120&pitch=130&emotion=happiness";
+static const char *VOICE_TTS_QUEST_VOICEVOX_APIKEY_KEY = "voice.tts-quest-voicevox.apiKey";
+static const char *VOICE_TTS_QUEST_VOICEVOX_PARAMS_KEY = "voice.tts-quest-voicevox.params";
+static const char *VOICE_TTS_QUEST_VOICEVOX_PARAMS_DEFAULT = "";
+
+static const char *CHAT_OPENAI_APIKEY_KEY = "chat.openai.apiKey";
+static const char *CHAT_OPENAI_CHATGPT_MODEL_KEY = "chat.openai.model";
+static const char *CHAT_OPENAI_CHATGPT_MODEL_DEFAULT = "gpt-3.5-turbo-0613";
+static const char *CHAT_OPENAI_STREAM_KEY = "chat.openai.stream";
+static const bool CHAT_OPENAI_STREAM_DEFAULT = true;
+static const char *CHAT_OPENAI_ROLES_KEY = "chat.openai.roles";
+static const char *CHAT_OPENAI_MAX_HISTORY_KEY = "chat.openai.maxHistory";
+static const int CHAT_OPENAI_MAX_HISTORY_DEFAULT = 10;
+static const char *CHAT_RANDOM_INTERVAL_MIN_KEY = "chat.random.interval.min";
+static const int CHAT_RANDOM_INTERVAL_MIN_DEFAULT = 60;
+static const char *CHAT_RANDOM_INTERVAL_MAX_KEY = "chat.random.interval.min";
+static const int CHAT_RANDOM_INTERVAL_MAX_DEFAULT = 120;
+static const char *CHAT_RANDOM_QUESTIONS_KEY = "chat.random.questions";
+static const char *CHAT_CLOCK_HOURS_KEY = "chat.clock.hours";
+
+bool AppSettings::init() {
+    auto settings = sdLoadString(APP_SETTINGS_SD_PATH);
+    if (settings != nullptr) {
+        if (!load(*settings)) {
+            return false;
+        }
+    } else {
+        load();
+    }
+    return true;
+}
 
 const char *AppSettings::getNetworkWifiSsid() {
     return get(NETWORK_WIFI_SSID_KEY);

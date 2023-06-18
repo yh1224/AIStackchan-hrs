@@ -17,7 +17,7 @@ std::unique_ptr<String> sdLoadString(const char *path) {
             Serial.printf("ERROR: Failed to open SD for reading (path=%s)\n", path);
         } else {
             auto tmpValue = fs.readString();
-            Serial.printf("SD/Loaded: %s=%s\n", path, tmpValue.c_str());
+            Serial.printf("SD/Loaded: %s (%d bytes)\n", path, tmpValue.length());
             value = std::unique_ptr<String>(new String(tmpValue));
             fs.close();
         }
