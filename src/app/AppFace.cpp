@@ -74,7 +74,10 @@ void AppFace::start() {
 
 void AppFace::loop() {
 #if !defined(WITHOUT_AVATAR)
-    _avatar.setBatteryStatus(M5.Power.isCharging(), M5.Power.getBatteryLevel());
+    if (_lastBatteryStatus == 0 || millis() - _lastBatteryStatus > 5000) {
+        _avatar.setBatteryStatus(M5.Power.isCharging(), M5.Power.getBatteryLevel());
+        _lastBatteryStatus = millis();
+    }
 #endif // !defined(WITHOUT_AVATAR)
 }
 

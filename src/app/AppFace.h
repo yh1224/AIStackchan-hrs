@@ -62,6 +62,9 @@ private:
 
     /// head swing mode
     bool _headSwing;
+
+    /// last time of get battery status
+    unsigned long _lastBatteryStatus = 0;
 #endif // !defined(WITHOUT_AVATAR)
 };
 
