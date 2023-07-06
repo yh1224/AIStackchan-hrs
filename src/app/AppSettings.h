@@ -5,6 +5,9 @@
 #include <utility>
 #include "lib/NvsSettings.h"
 
+#define NVS_NAMESPACE "AIStackchan-hrs"
+#define NVS_SETTINGS_KEY "settings"
+
 #define VOICE_SERVICE_GOOGLE_TRANSLATE_TTS "google-translate-tts"
 #define VOICE_SERVICE_GOOGLE_CLOUD_TTS "google-cloud-tts"
 #define VOICE_SERVICE_VOICETEXT "voicetext"
@@ -12,8 +15,7 @@
 
 class AppSettings : public NvsSettings {
 public:
-    explicit AppSettings(String nvsNamespace, String nvsKey)
-            : NvsSettings(std::move(nvsNamespace), std::move(nvsKey)) {}
+    explicit AppSettings() : NvsSettings(NVS_NAMESPACE, NVS_SETTINGS_KEY) {}
 
     bool init();
 

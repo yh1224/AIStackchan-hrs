@@ -1,27 +1,14 @@
-#include <Arduino.h>
+#include <boost/di.hpp>
 
 #include "app/App.h"
-#include "app/AppChat.h"
-#include "app/AppFace.h"
-#include "app/AppSettings.h"
-#include "app/AppServer.h"
-#include "app/AppVoice.h"
 
-// NVS Namespace
-static const char *NVS_NAMESPACE = "AIStackchan-hrs";
+namespace di = boost::di;
 
-// NVS Key for settings
-static const char *NVS_SETTINGS_KEY = "settings";
-
-static std::unique_ptr<App> app;
+static std::shared_ptr<App> app;
 
 void setup() {
-    auto settings = std::make_shared<AppSettings>(NVS_NAMESPACE, NVS_SETTINGS_KEY);
-    auto voice = std::make_shared<AppVoice>(settings);
-    auto face = std::make_shared<AppFace>(settings, voice);
-    auto chat = std::make_shared<AppChat>(settings, voice, face);
-    auto server = std::make_shared<AppServer>(settings, voice, face, chat);
-    app = std::make_unique<App>(settings, voice, face, chat, server);
+    auto injector = di::make_injector();
+    app = injector.create<std::shared_ptr<App>>();
     app->setup();
 }
 
