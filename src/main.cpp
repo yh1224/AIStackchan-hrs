@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <memory>
 
 #include "app/App.h"
 #include "app/AppChat.h"
@@ -21,7 +22,7 @@ void setup() {
     auto face = std::make_shared<AppFace>(settings, voice);
     auto chat = std::make_shared<AppChat>(settings, voice, face);
     auto server = std::make_shared<AppServer>(settings, voice, face, chat);
-    app = std::unique_ptr<App>(new App(settings, voice, face, chat, server));
+    app = std::make_unique<App>(settings, voice, face, chat, server);
     app->setup();
 }
 

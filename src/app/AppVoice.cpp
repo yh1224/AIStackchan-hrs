@@ -1,4 +1,5 @@
 #include <deque>
+#include <memory>
 #include <Arduino.h>
 #include <AudioFileSourceBuffer.h>
 #include <AudioGeneratorMP3.h>
@@ -25,7 +26,7 @@ const static char *VOICETEXT_VOICE_PARAMS[] = {
 };
 
 bool AppVoice::init() {
-    _audioMp3 = std::unique_ptr<AudioGeneratorMP3>(new AudioGeneratorMP3());
+    _audioMp3 = std::make_unique<AudioGeneratorMP3>();
 
     _allocatedBuffer = std::unique_ptr<uint8_t>((uint8_t *) malloc(BUFFER_SIZE));
     if (!_allocatedBuffer) {
@@ -132,8 +133,7 @@ void AppVoice::speak(const String &text, const String &voiceName) {
     xSemaphoreTake(_lock, portMAX_DELAY);
     // add each sentence to message list
     for (const auto &sentence: splitSentence(text.c_str())) {
-        _speechMessages.push_back(std::unique_ptr<SpeechMessage>(
-                new SpeechMessage(sentence.c_str(), voiceName.c_str())));
+        _speechMessages.push_back(std::make_unique<SpeechMessage>(sentence.c_str(), voiceName.c_str()));
     }
     xSemaphoreGive(_lock);
 }
@@ -179,8 +179,8 @@ void AppVoice::_loop() {
                 if (!message->voice.isEmpty()) {
                     params["speaker"] = message->voice.c_str();
                 }
-                _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceTtsQuestVoicevox(
-                        _settings->getTtsQuestVoicevoxApiKey(), message->text.c_str(), params));
+                _audioSource = std::make_unique<AudioFileSourceTtsQuestVoicevox>(
+                        _settings->getTtsQuestVoicevoxApiKey(), message->text.c_str(), params);
             } else if (strcasecmp(_settings->getVoiceService(), VOICE_SERVICE_VOICETEXT) == 0
                        && _settings->getVoiceTextApiKey() != nullptr) {
                 // VoiceText API
@@ -202,8 +202,8 @@ void AppVoice::_loop() {
                 _audioSource = std::unique_ptr<AudioFileSource>(new AudioFileSourceGoogleTranslateTts(
                         message->text.c_str(), params));
             }
-            _audioSourceBuffer = std::unique_ptr<AudioFileSourceBuffer>(
-                    new AudioFileSourceBuffer(_audioSource.get(), _allocatedBuffer.get(), BUFFER_SIZE));
+            _audioSourceBuffer = std::make_unique<AudioFileSourceBuffer>(
+                    _audioSource.get(), _allocatedBuffer.get(), BUFFER_SIZE);
             _audioMp3->begin(_audioSourceBuffer.get(), &_audioOut);
             Serial.printf("voice start: %s\n", message->text.c_str());
         }
