@@ -133,7 +133,7 @@ void AppVoice::speak(const String &text, const String &voiceName) {
     xSemaphoreTake(_lock, portMAX_DELAY);
     // add each sentence to message list
     for (const auto &sentence: splitSentence(text.c_str())) {
-        _speechMessages.push_back(std::make_unique<SpeechMessage>(sentence.c_str(), voiceName.c_str()));
+        _speechMessages.push_back(std::make_unique<SpeechMessage>(sentence.c_str(), voiceName));
     }
     xSemaphoreGive(_lock);
 }
