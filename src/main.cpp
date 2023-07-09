@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <memory>
 
 #include "app/App.h"
 #include "app/AppChat.h"
