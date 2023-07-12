@@ -43,7 +43,7 @@ std::unique_ptr<String> spiffsLoadString(const char *path) {
         Serial.println("ERROR: Failed to begin SPIFFS");
     } else {
         File f = SPIFFS.open(path, "r");
-        if (!f) {
+        if (!f || f.size() == 0) {
             Serial.printf("ERROR: Failed to open SPIFFS for reading (path=%s)\n", path);
         } else {
             auto tmpValue = f.readString();
