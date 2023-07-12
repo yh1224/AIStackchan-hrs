@@ -47,7 +47,7 @@ std::unique_ptr<String> spiffsLoadString(const char *path) {
             Serial.printf("ERROR: Failed to open SPIFFS for reading (path=%s)\n", path);
         } else {
             auto tmpValue = f.readString();
-            Serial.printf("SPIFFS/Loaded: %s=%s\n", path, tmpValue.c_str());
+            Serial.printf("SPIFFS/Loaded: %s (%d bytes)\n", path, tmpValue.length());
             value = std::make_unique<String>(tmpValue);
             f.close();
         }
