@@ -34,6 +34,9 @@ private:
 
     ESP32WebServer _httpServer{80};
 
+    /// Busy flag
+    bool _busy = false;
+
     void _onRoot();
 
     void _onSpeech();

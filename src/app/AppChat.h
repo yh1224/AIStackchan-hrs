@@ -10,6 +10,15 @@
 #include "app/AppSettings.h"
 #include "app/AppVoice.h"
 
+class ChatRequest {
+public:
+    ChatRequest(String text, String voice, const std::function<void(const char *)> &onReceiveAnswer)
+            : text(std::move(text)), voice(std::move(voice)), onReceiveAnswer(onReceiveAnswer) {};
+    String text;
+    String voice;
+    std::function<void(const char *)> onReceiveAnswer;
+};
+
 class AppChat {
 public:
     explicit AppChat(
@@ -28,11 +37,13 @@ public:
 
     void speakCurrentTime();
 
-    String talk(const String &text, String &voiceName) {
-        return talk(text, voiceName, false);
+    void talk(const String &text, String &voiceName,
+              const std::function<void(const char *)> &onReceiveAnswer) {
+        talk(text, voiceName, false, onReceiveAnswer);
     }
 
-    String talk(const String &text, const String &voiceName, bool useHistory);
+    void talk(const String &text, const String &voiceName, bool useHistory,
+              const std::function<void(const char *)> &onReceiveAnswer);
 
 private:
     std::shared_ptr<AppSettings> _settings;
@@ -54,6 +65,9 @@ private:
 
     /// random speak mode: next speak time
     unsigned long _randomSpeakNextTime = 0;
+
+    /// chat requests
+    std::deque<std::unique_ptr<ChatRequest>> _chatRequests;
 
     /// chat history (questions and answers)
     std::deque<String> _chatHistory;

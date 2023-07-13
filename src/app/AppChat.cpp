@@ -78,13 +78,12 @@ void AppChat::speakCurrentTime() {
  *
  * @param text question
  * @param useHistory use chat history
- * @return answer
  */
-String AppChat::talk(const String &text, const String &voiceName, bool useHistory) {
+void AppChat::talk(const String &text, const String &voiceName, bool useHistory,
+                   const std::function<void(const char *)> &onReceiveAnswer) {
     xSemaphoreTake(_lock, portMAX_DELAY);
-    auto answer = _talk(text, voiceName, useHistory);
+    _chatRequests.push_back(std::make_unique<ChatRequest>(text, voiceName, onReceiveAnswer));
     xSemaphoreGive(_lock);
-    return answer;
 }
 
 unsigned long AppChat::_getRandomSpeakNextTime() {
@@ -223,15 +222,27 @@ void AppChat::_loop() {
         _hideBalloon = -1;
     }
 
-    if (!_voice->isPlaying() && xSemaphoreTake(_lock, 1) == pdTRUE) {
+    if (!_voice->isPlaying()) {
         if (_settings->isClockSpeakEnabled() && _isClockSpeakTimeNow()) {
             // clock speak mode
             speakCurrentTime();
         } else if (_randomSpeakMode && _isRandomSpeakTimeNow(now)) {
             // random speak mode
             _talk(_getRandomSpeakQuestion(), "", false);
+        } else {
+            xSemaphoreTake(_lock, portMAX_DELAY);
+            std::unique_ptr<ChatRequest> request = nullptr;
+            if (!_chatRequests.empty()) {
+                request = std::move(_chatRequests.front());
+                _chatRequests.pop_front();
+            }
+            xSemaphoreGive(_lock);
+            if (request != nullptr) {
+                // handle request
+                auto answer = _talk(request->text, request->voice, true);
+                request->onReceiveAnswer(answer.c_str());
+            }
         }
-        xSemaphoreGive(_lock);
     }
     delay(500);
 }

@@ -25,7 +25,9 @@ void AppServer::setup() {
 }
 
 void AppServer::loop() {
-    _httpServer.handleClient();
+    if (!_busy) {
+        _httpServer.handleClient();
+    }
 }
 
 void AppServer::_onRoot() {
@@ -56,8 +58,11 @@ void AppServer::_onChat() {
     auto text = _httpServer.arg("text");
     auto voiceName = _httpServer.arg("voice");
     _voice->stopSpeak();
-    auto answer = _chat->talk(text, voiceName, true);
-    _httpServer.send(200, "text/plain", answer);
+    _chat->talk(text, voiceName, true, [&](const char *answer) {
+        _httpServer.send(200, "text/plain", answer);
+        _busy = false;
+    });
+    _busy = true;
 }
 
 void AppServer::_onApikey() {
