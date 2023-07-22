@@ -159,9 +159,9 @@ curl -X POST "http://(Stack-chan's IP address)/speech" \
 
 - Path: /chat
 - Parameters
-  - message : question
+  - text : question
 
 ```shell
 curl -X POST "http://(Stack-chan's IP address)/chat" \
-    -d "message=Say something"
+    -d "text=Say something"
 ```
