@@ -146,13 +146,13 @@ Here is the example of settings.
 
 - Path: /speech
 - Parameters
-  - text : Text to speak
+  - say : Text to speak
 
 Example
 
 ```shell
 curl -X POST "http://(Stack-chan's IP address)/speech" \
-    -d "text=Hello"
+    -d "say=Hello"
 ```
 
 ### Chat API
