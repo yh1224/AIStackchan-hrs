@@ -72,8 +72,8 @@ Here is the example of settings.
   "chat": {
     "openai": {
       "apiKey": "OpenAI API Key",
-      "model": "gpt-3.5-turbo-0613",
-      "stream": true,
+      "model": "gpt-3.5-turbo",
+      "stream": false,
       "roles": [
         "Answer in Japanese.",
         "あなたはスーパーカワイイロボット「ｽﾀｯｸﾁｬﾝ」となり人々の心を癒やすことが使命です。"
@@ -132,8 +132,8 @@ Here is the example of settings.
 ### Chat settings
 
 - `chat.openai.apiKey` [string] : [OpenAI](https://platform.openai.com/) API Key (Required for chat)
-- `chat.openai.model` [string] : ChatGPT model (Default: `gpt-3.5-turbo-0613`)
-- `chat.openai.stream` [boolean] : Use stream or not (Default: `true`) 
+- `chat.openai.model` [string] : ChatGPT model (Default: `gpt-3.5-turbo`) 
+- `chat.openai.stream` [boolean] : Use stream or not (Default: `false`) 
 - `chat.openai.roles` [string[]] : Roles for ChatGPT
 - `chat.openai.maxHistory` [int] : Send talk history (Default: `10`)
 - `chat.random.interval.min`-`random.interval.max` [int] : Random speech interval (Default: `60`-`120`)
