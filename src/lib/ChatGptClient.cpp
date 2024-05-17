@@ -270,7 +270,7 @@ String ChatGptClient::_httpPost(
         Serial.printf("<<< %d\n", httpCode);
         String payload;
         if (onReceiveData != nullptr
-            && http.header("Content-Type") == "text/event-stream"
+            && http.header("Content-Type").startsWith("text/event-stream")
             && http.header("Transfer-Encoding") == "chunked") {
             // Receive Event Stream
             std::stringstream ss;
