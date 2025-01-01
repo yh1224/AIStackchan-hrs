@@ -30,7 +30,7 @@ curl -X POST "http://(Stack-chan's IP address)/settings" \
     -d @settings.json
 ```
 
-You can also update some settings indivisually.
+You can also update some settings individually.
 
 ```shell
 curl -X POST "http://(Stack-chan's IP address)/settings" \
