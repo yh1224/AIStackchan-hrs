@@ -16,6 +16,7 @@ bool AppFace::init() {
     int servoPinX = pin.first;
     int servoPinY = pin.second;
     if (_settings->isServoEnabled() && servoPinX != 0 && servoPinY != 0) {
+        _headSwing = _settings->getSwingEnabled();
         auto home = _settings->getSwingHome();
         _homeX = home.first;
         _homeY = home.second;
@@ -48,7 +49,6 @@ bool AppFace::init() {
 
         setSpeedForAllServos(30);
         synchronizeAllServosStartAndWaitForAllServosToStop();
-        _headSwing = true;
     }
 #endif // !defined(WITHOUT_AVATAR)
     return true;

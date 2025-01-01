@@ -18,6 +18,8 @@ static const char *SERVO_KEY = "servo";
 static const char *SERVO_PIN_X_KEY = "servo.pin.x";
 static const char *SERVO_PIN_Y_KEY = "servo.pin.y";
 static const char *SWING_HOME_X_KEY = "swing.home.x";
+static const char *SWING_ENABLE_KEY = "swing.enable";
+static const int SWING_ENABLE_DEFAULT = true;
 static const int SWING_HOME_X_DEFAULT = 90;
 static const char *SWING_HOME_Y_KEY = "swing.home.y";
 static const int SWING_HOME_Y_DEFAULT = 80;
@@ -94,6 +96,10 @@ std::pair<int, int> AppSettings::getServoPin() {
     int servoPinX = get(SERVO_PIN_X_KEY);
     int servoPinY = get(SERVO_PIN_Y_KEY);
     return std::make_pair(servoPinX, servoPinY);
+}
+
+bool AppSettings::getSwingEnabled() {
+    return has(SWING_ENABLE_KEY) ? get(SWING_ENABLE_KEY) : SWING_ENABLE_DEFAULT;
 }
 
 std::pair<int, int> AppSettings::getSwingHome() {

@@ -113,6 +113,7 @@ Here is the example of settings.
   - M5Stack Core2 - Port A : `{"x": 33, "y": 32}`
   - M5Stack Core2 - Port C : `{"x": 13, "y": 14}`
   - M5Stack Core/Fire : `{"x": 21, "y": 22}`
+- `swing.enable` [boolean] : Enable swing
 - `swing.home.x`, `swing.home.y` [int] : Home position in degrees (Default: `{"x": 90, "y": 80}`)
 - `swing.range.x`, `swing.range.y` [int] : Swing range in degrees (Default: `{"x": 30, "y": 20}`)
 

@@ -33,6 +33,8 @@ public:
 
     std::pair<int, int> getServoPin();
 
+    bool getSwingEnabled();
+
     std::pair<int, int> getSwingHome();
 
     std::pair<int, int> getSwingRange();
