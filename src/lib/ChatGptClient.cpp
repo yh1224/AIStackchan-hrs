@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "lib/ChatGptClient.h"
+#include "lib/ssl.h"
 #include "lib/utils.h"
 
 /// Chat API URL
@@ -13,24 +14,6 @@ static const char *CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
 /// size for request/response
 static const size_t CONTENT_MAX_SIZE = 16 * 1024;
-
-// Google Trust Services https://pki.goog/repository/
-/// GTS Root R4, Valid Until 2036-06-22
-static const char *caCert = \
-"-----BEGIN CERTIFICATE-----\n" \
-"MIICCTCCAY6gAwIBAgINAgPlwGjvYxqccpBQUjAKBggqhkjOPQQDAzBHMQswCQYD\n" \
-"VQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExMQzEUMBIG\n" \
-"A1UEAxMLR1RTIFJvb3QgUjQwHhcNMTYwNjIyMDAwMDAwWhcNMzYwNjIyMDAwMDAw\n" \
-"WjBHMQswCQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2Vz\n" \
-"IExMQzEUMBIGA1UEAxMLR1RTIFJvb3QgUjQwdjAQBgcqhkjOPQIBBgUrgQQAIgNi\n" \
-"AATzdHOnaItgrkO4NcWBMHtLSZ37wWHO5t5GvWvVYRg1rkDdc/eJkTBa6zzuhXyi\n" \
-"QHY7qca4R9gq55KRanPpsXI5nymfopjTX15YhmUPoYRlBtHci8nHc8iMai/lxKvR\n" \
-"HYqjQjBAMA4GA1UdDwEB/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQW\n" \
-"BBSATNbrdP9JNqPV2Py1PsVq8JQdjDAKBggqhkjOPQQDAwNpADBmAjEA6ED/g94D\n" \
-"9J+uHXqnLrmvT/aDHQ4thQEd0dlq7A/Cr8deVl5c1RxYIigL9zC2L7F8AjEA8GE8\n" \
-"p/SgguMh1YQdc4acLa/KNJvxn7kjNuK8YAOdgLOaVsjh4rsUecrNIdSUtUlD\n" \
-"-----END CERTIFICATE-----\n" \
-"";
 
 ChatGptClient::ChatGptClient(String apiKey, String model) : _apiKey(std::move(apiKey)), _model(std::move(model)) {}
 
@@ -239,7 +222,11 @@ String ChatGptClient::_httpPost(
     http.collectHeaders(headerKeys, 2);
 
     WiFiClientSecure client;
-    client.setCACert(caCert);
+#if defined(USE_CA_CERT_BUNDLE)
+    client.setCACertBundle(rootca_crt_bundle);
+#else
+    client.setCACert(gts_root_r4_crt);
+#endif
     if (http.begin(client, url)) {
         http.addHeader("Content-Type", "application/json");
         http.addHeader("Authorization", String("Bearer ") + _apiKey);
