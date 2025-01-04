@@ -124,7 +124,11 @@ void App::_onTapCenter() {
  */
 void App::_onButtonA() {
     M5.Speaker.tone(1000, 100);
-    _chat->toggleRandomSpeakMode();
+    if (_settings->getOpenAiApiKey() == nullptr) {
+        _chat->speakCurrentTime();
+    } else {
+        _chat->toggleRandomSpeakMode();
+    }
 }
 
 void App::_onButtonB() {}
