@@ -1,5 +1,7 @@
 # AIStackchan-hrs
 
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-Documentation-blue)](https://deepwiki.com/yh1224/AIStackchan-hrs)
+
 ## Summary
 
 This is an alternative implementation of AI Stack-chan. Super thanks to [meganetaaan](https://github.com/meganetaaan) the originator of Stack-chan and [robo8080](https://github.com/robo8080) the originator of AI Stack-chan.
